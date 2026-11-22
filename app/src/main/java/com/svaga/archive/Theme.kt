@@ -192,7 +192,7 @@ fun PixelButton(
     val bg = if (filled) accent else Panel2
     val fg = if (filled) Bg else accent
     Box(modifier = modifier.alpha(if (enabled) 1f else 0.4f).padding(end = 3.dp, bottom = 3.dp)) {
-        Box(Modifier.matchParentSize().offset(x = 3.dp, y = 3.dp).background(RetroShadow, RoundedCornerShape(10.dp)))
+        Box(Modifier.fillMaxSize().offset(x = 3.dp, y = 3.dp).background(RetroShadow, RoundedCornerShape(10.dp)))
         Box(
             modifier = Modifier
                 .background(bg, RoundedCornerShape(10.dp))
