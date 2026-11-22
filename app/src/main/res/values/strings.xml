@@ -357,4 +357,8 @@
     <string name="notice_identity_linked">Account linked</string>
     <string name="play_in_emulator">Play in Svaga Emulator</string>
     <string name="emulator_missing">Svaga Emulator is not installed</string>
+    <string name="hub_library">In library</string>
+    <string name="hub_completed">Completed</string>
+    <string name="hub_rated">Rated</string>
+    <string name="hub_comments">Comments</string>
 </resources>

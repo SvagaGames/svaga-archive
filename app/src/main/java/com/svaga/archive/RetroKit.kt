@@ -21,12 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val ShadowC: Color get() = if (Palette.dark) Color(0xFF000000) else Color(0xFF2A2118)
+val RetroShadow: Color get() = if (Palette.dark) Color(0xFF000000) else Color(0xFF2A2118)
 
 @Composable
 fun RetroCard(modifier: Modifier = Modifier, radius: Int = 12, pad: Int = 12, content: @Composable ColumnScope.() -> Unit) {
     Box(modifier = modifier.padding(end = 4.dp, bottom = 4.dp)) {
-        Box(Modifier.matchParentSize().offset(x = 4.dp, y = 4.dp).background(ShadowC, RoundedCornerShape(radius.dp)))
+        Box(Modifier.matchParentSize().offset(x = 4.dp, y = 4.dp).background(RetroShadow, RoundedCornerShape(radius.dp)))
         Column(
             Modifier
                 .border(BorderStroke(2.dp, Line), RoundedCornerShape(radius.dp))
@@ -55,7 +55,7 @@ fun RetroChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: M
 fun RetroButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, color: Color = Cyan) {
     val shape = RoundedCornerShape(10.dp)
     Box(modifier.padding(end = 3.dp, bottom = 3.dp)) {
-        Box(Modifier.matchParentSize().offset(x = 3.dp, y = 3.dp).background(ShadowC, shape))
+        Box(Modifier.matchParentSize().offset(x = 3.dp, y = 3.dp).background(RetroShadow, shape))
         Text(
             label, fontFamily = Pixel, fontSize = 12.sp, color = Bg,
             modifier = Modifier

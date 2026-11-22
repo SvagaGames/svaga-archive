@@ -357,4 +357,8 @@
     <string name="notice_identity_linked">Аккаунт привязан</string>
     <string name="play_in_emulator">Играть в Svaga Emulator</string>
     <string name="emulator_missing">Svaga Emulator не установлен</string>
+    <string name="hub_library">В библиотеке</string>
+    <string name="hub_completed">Пройдено</string>
+    <string name="hub_rated">Оценок</string>
+    <string name="hub_comments">Комментарии</string>
 </resources>

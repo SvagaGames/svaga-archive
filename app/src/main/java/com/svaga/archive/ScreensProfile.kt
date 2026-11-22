@@ -4,6 +4,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -130,7 +132,7 @@ fun CommentRow(
 
 @Composable
 fun LevelCard(level: Int, sp: Int, from: Int, to: Int, modifier: Modifier = Modifier) {
-    Column(modifier.fillMaxWidth().background(Panel).border(2.dp, Cyan).padding(12.dp)) {
+    Column(modifier.fillMaxWidth().background(Panel, RoundedCornerShape(12.dp)).border(2.dp, Cyan, RoundedCornerShape(12.dp)).padding(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.level_n, level), color = Cyan, fontFamily = Pixel, fontSize = 11.sp)
             Text(levelName(level), color = Ink, fontFamily = Vt, fontSize = 22.sp, modifier = Modifier.padding(start = 10.dp))
@@ -248,6 +250,13 @@ fun ProfileScreen(vm: AppViewModel, onOpenGame: (Int) -> Unit, onGo: (String) ->
                 ach?.stats?.get("library") ?: 0,
                 ach?.stats?.get("completed") ?: 0,
                 ach?.stats?.get("rated") ?: 0,
+            )
+            Spacer(Modifier.height(10.dp))
+            StatusGrid(
+                ach?.stats?.get("library") ?: 0,
+                ach?.stats?.get("completed") ?: 0,
+                ach?.stats?.get("rated") ?: 0,
+                vm.myComments.size,
             ),
             color = Muted,
             fontFamily = Vt,
@@ -652,5 +661,34 @@ fun UserProfileScreen(vm: AppViewModel, id: String, onBack: () -> Unit, onOpenGa
             }
             Spacer(Modifier.height(12.dp))
         }
+    }
+}
+
+
+@Composable
+fun StatusGrid(lib: Int, done: Int, rated: Int, comments: Int) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            HubCell(lib, R.string.hub_library, Cyan, Modifier.weight(1f))
+            HubCell(done, R.string.hub_completed, Green, Modifier.weight(1f))
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            HubCell(rated, R.string.hub_rated, Amber, Modifier.weight(1f))
+            HubCell(comments, R.string.hub_comments, Pink, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun HubCell(value: Int, label: Int, color: Color, modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .background(Panel, RoundedCornerShape(12.dp))
+            .border(2.dp, Line, RoundedCornerShape(12.dp))
+            .padding(14.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("$value", color = color, fontFamily = Pixel, fontSize = 22.sp)
+        Text(stringResource(label), color = Muted, fontFamily = Vt, fontSize = 13.sp, modifier = Modifier.padding(top = 6.dp))
     }
 }
