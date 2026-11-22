@@ -34,6 +34,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -188,16 +191,18 @@ fun PixelButton(
 ) {
     val bg = if (filled) accent else Panel2
     val fg = if (filled) Bg else accent
-    Box(
-        modifier = modifier
-            .alpha(if (enabled) 1f else 0.4f)
-            .background(bg)
-            .border(2.dp, accent)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text, color = fg, fontFamily = Pixel, fontSize = 10.sp, textAlign = TextAlign.Center)
+    Box(modifier = modifier.alpha(if (enabled) 1f else 0.4f).padding(end = 3.dp, bottom = 3.dp)) {
+        Box(Modifier.matchParentSize().offset(x = 3.dp, y = 3.dp).background(RetroShadow, RoundedCornerShape(10.dp)))
+        Box(
+            modifier = Modifier
+                .background(bg, RoundedCornerShape(10.dp))
+                .border(2.dp, accent, RoundedCornerShape(10.dp))
+                .clickable(enabled = enabled, onClick = onClick)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(text, color = fg, fontFamily = Pixel, fontSize = 10.sp, textAlign = TextAlign.Center)
+        }
     }
 }
 
@@ -211,8 +216,8 @@ fun PixelChip(
 ) {
     Box(
         modifier = modifier
-            .background(if (selected) accent else Panel2)
-            .border(2.dp, if (selected) accent else Line)
+            .background(if (selected) accent else Panel2, RoundedCornerShape(8.dp))
+            .border(2.dp, if (selected) accent else Line, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
@@ -227,7 +232,8 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
         text,
         color = Cyan,
         fontFamily = Pixel,
-        fontSize = 10.sp,
+        fontSize = 11.sp,
+        letterSpacing = 1.sp,
         modifier = modifier.padding(top = 18.dp, bottom = 8.dp),
     )
 }
