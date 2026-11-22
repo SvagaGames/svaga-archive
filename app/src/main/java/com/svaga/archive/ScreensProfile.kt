@@ -239,6 +239,13 @@ fun ProfileScreen(vm: AppViewModel, onOpenGame: (Int) -> Unit, onGo: (String) ->
             from = ach?.levelFrom ?: 0,
             to = ach?.levelTo ?: 100,
         )
+        Spacer(Modifier.height(10.dp))
+        StatusGrid(
+            ach?.stats?.get("library") ?: 0,
+            ach?.stats?.get("completed") ?: 0,
+            ach?.stats?.get("rated") ?: 0,
+            vm.myComments.size,
+        )
         val featured = ach?.items.orEmpty().filter { it.featured }
         if (featured.isNotEmpty()) {
             Spacer(Modifier.height(10.dp))
@@ -250,13 +257,6 @@ fun ProfileScreen(vm: AppViewModel, onOpenGame: (Int) -> Unit, onGo: (String) ->
                 ach?.stats?.get("library") ?: 0,
                 ach?.stats?.get("completed") ?: 0,
                 ach?.stats?.get("rated") ?: 0,
-            )
-            Spacer(Modifier.height(10.dp))
-            StatusGrid(
-                ach?.stats?.get("library") ?: 0,
-                ach?.stats?.get("completed") ?: 0,
-                ach?.stats?.get("rated") ?: 0,
-                vm.myComments.size,
             ),
             color = Muted,
             fontFamily = Vt,
