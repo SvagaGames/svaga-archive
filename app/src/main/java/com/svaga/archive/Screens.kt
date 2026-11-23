@@ -232,7 +232,7 @@ fun MainNav(vm: AppViewModel) {
 fun BellButton(vm: AppViewModel, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Box(modifier.clickable(onClick = onClick).padding(6.dp)) {
         Box(Modifier.background(Panel2).border(2.dp, if (vm.unread > 0) Amber else Line).padding(horizontal = 8.dp, vertical = 4.dp)) {
-            Text("🔔", fontSize = 16.sp)
+            Text("🔔", color = Amber, fontSize = 16.sp)
         }
         if (vm.unread > 0) {
             Text(
