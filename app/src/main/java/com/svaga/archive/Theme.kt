@@ -76,9 +76,9 @@ object Palette {
         }
 }
 
-val Bg: Color get() = if (Palette.dark) Color(0xFF0C1424) else Color(0xFFF3F0E6)
-val Panel: Color get() = if (Palette.dark) Color(0xFF111D33) else Color(0xFFFFFFFF)
-val Panel2: Color get() = if (Palette.dark) Color(0xFF0A1120) else Color(0xFFEAE5D8)
+val Bg: Color get() = if (Palette.dark) Color(0xFF0C1424) else Color(0xFFE8E0D5)
+val Panel: Color get() = if (Palette.dark) Color(0xFF111D33) else Color(0xFFF0E8DC)
+val Panel2: Color get() = if (Palette.dark) Color(0xFF0A1120) else Color(0xFFDDD5C8)
 val Ink: Color get() = if (Palette.dark) Color(0xFFE9EFF8) else Color(0xFF17202F)
 val Muted: Color get() = if (Palette.dark) Color(0xFF8FA3BF) else Color(0xFF5C6B80)
 val Line: Color get() = if (Palette.dark) Color(0xFF26364F) else Color(0xFFC7CEDA)
