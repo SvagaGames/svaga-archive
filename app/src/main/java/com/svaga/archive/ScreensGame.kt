@@ -114,7 +114,7 @@ fun RuTranslationsBlock(vm: AppViewModel, gameId: Int) {
                 if (!t.url.isNullOrBlank()) {
                     Text(
                         stringResource(R.string.ru_open),
-                        color = Blue,
+                        color = Cyan,
                         fontFamily = Vt,
                         fontSize = 17.sp,
                         modifier = Modifier.clickable { runCatching { uri.openUri(t.url) } },
@@ -304,7 +304,7 @@ fun GameDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onOpenGame: 
                 if (ru != null) {
                     Text(
                         stringResource(if (showOriginal) R.string.show_translation else R.string.show_original),
-                        color = Blue,
+                        color = Cyan,
                         fontFamily = Vt,
                         fontSize = 17.sp,
                         modifier = Modifier

@@ -350,7 +350,7 @@ fun AuthScreen(vm: AppViewModel) {
             if (mode == 0) {
                 Text(
                     stringResource(R.string.forgot_password),
-                    color = Blue,
+                    color = Cyan,
                     fontFamily = Vt,
                     fontSize = 17.sp,
                     modifier = Modifier
@@ -410,7 +410,7 @@ fun AuthScreen(vm: AppViewModel) {
             Spacer(Modifier.height(16.dp))
             Text(
                 stringResource(R.string.reset_back),
-                color = Blue,
+                color = Cyan,
                 fontFamily = Vt,
                 fontSize = 19.sp,
                 modifier = Modifier.clickable {
@@ -432,7 +432,7 @@ fun AuthScreen(vm: AppViewModel) {
             Spacer(Modifier.height(16.dp))
             Text(
                 stringResource(if (mode == 1) R.string.to_login else R.string.to_register),
-                color = Blue,
+                color = Cyan,
                 fontFamily = Vt,
                 fontSize = 19.sp,
                 modifier = Modifier.clickable { mode = if (mode == 1) 0 else 1 }.padding(8.dp),

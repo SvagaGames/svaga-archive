@@ -100,7 +100,7 @@ fun CommentRow(
             if (onOpenGame != null && !c.gameName.isNullOrBlank()) {
                 Text(
                     "▶ " + c.gameName,
-                    color = Blue,
+                    color = Cyan,
                     fontFamily = Vt,
                     fontSize = 17.sp,
                     modifier = Modifier.clickable(onClick = onOpenGame).padding(vertical = 2.dp),

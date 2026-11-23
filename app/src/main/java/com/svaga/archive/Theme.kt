@@ -259,7 +259,7 @@ fun PixelField(
             {
                 Text(
                     stringResource(if (visible) R.string.hide_password else R.string.show_password),
-                    color = Blue,
+                    color = Cyan,
                     fontFamily = Vt,
                     fontSize = 15.sp,
                     modifier = Modifier.clickable { visible = !visible }.padding(horizontal = 10.dp, vertical = 8.dp),
