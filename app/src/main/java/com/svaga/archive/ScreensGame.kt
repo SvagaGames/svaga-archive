@@ -343,13 +343,12 @@ fun GameDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onOpenGame: 
                 } else if (Lang.code != "en" && !game.custom) {
                     Text(
                         stringResource(R.string.translation_unavailable),
-                    Spacer(Modifier.height(8.dp))
-                    PixelButton("Перевести", onClick = { vm.ensureTranslation(id) }, accent = Cyan)
                         color = Muted,
                         fontFamily = Vt,
                         fontSize = 17.sp,
                         modifier = Modifier.padding(vertical = 8.dp),
                     )
+                PixelButton("Перевести", onClick = { vm.ensureTranslation(id) }, accent = Cyan)
                 }
             }
             Spacer(Modifier.height(8.dp))
