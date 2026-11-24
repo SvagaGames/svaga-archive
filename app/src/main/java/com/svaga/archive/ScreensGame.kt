@@ -37,6 +37,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun MetaLine(label: String, value: String?) {
@@ -200,13 +205,21 @@ fun GameDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onOpenGame: 
                 modifier = Modifier.padding(top = 24.dp),
             )
         } else {
-            Row(Modifier.padding(top = 16.dp)) {
-                Cover(game.cover, Modifier.width(120.dp).aspectRatio(0.75f).border(2.dp, Line))
-                Column(Modifier.padding(start = 12.dp)) {
-                    Text(game.name, color = Ink, fontFamily = Pixel, fontSize = 12.sp, lineHeight = 18.sp)
-                    MetaLine(stringResource(R.string.released), game.releaseDate)
-                    MetaLine(stringResource(R.string.developers), game.developers.joinToString(", "))
-                    if (game.custom) MetaLine(stringResource(R.string.added_by), game.addedBy ?: stringResource(R.string.added_by_community))
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.5f)
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(2.dp, Line, RoundedCornerShape(10.dp)),
+            ) {
+                Cover(game.cover, Modifier.fillMaxSize())
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Brush.verticalGradient(listOf(Bg.copy(alpha = 0f), Bg.copy(alpha = 0.92f)))),
+                )
+                Column(Modifier.align(Alignment.BottomStart).padding(12.dp)) {
+                    Text(game.name, color = Ink, fontFamily = Pixel, fontSize = 16.sp, lineHeight = 22.sp)
                     game.rating?.let { r ->
                         Text(
                             "IGDB $r",
@@ -214,12 +227,17 @@ fun GameDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onOpenGame: 
                             fontFamily = Pixel,
                             fontSize = 10.sp,
                             modifier = Modifier
-                                .padding(top = 10.dp)
-                                .background(ratingColor(r))
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                                .padding(top = 6.dp)
+                                .background(ratingColor(r), RoundedCornerShape(4.dp))
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                         )
                     }
                 }
+            }
+            Column(Modifier.padding(top = 10.dp)) {
+                MetaLine(stringResource(R.string.released), game.releaseDate)
+                MetaLine(stringResource(R.string.developers), game.developers.joinToString(", "))
+                if (game.custom) MetaLine(stringResource(R.string.added_by), game.addedBy ?: stringResource(R.string.added_by_community))
             }
 
             val st = vm.gameStats[id]
@@ -235,6 +253,17 @@ fun GameDetailScreen(vm: AppViewModel, id: Int, onBack: () -> Unit, onOpenGame: 
                 fontSize = 17.sp,
             )
 
+            if (st != null) {
+                Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GameStatTile(st.inLibrary.toString(), "В библиотеке", Cyan, Modifier.weight(1f))
+                    GameStatTile(st.completed.toString(), "Прошли", Green, Modifier.weight(1f))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GameStatTile(st.ratingCount.toString(), "Оценок", Amber, Modifier.weight(1f))
+                    GameStatTile(if (st.avgRating != null) st.avgRating.toString() else "—", "Средняя", Pink, Modifier.weight(1f))
+                }
+            }
             val playCtx = androidx.compose.ui.platform.LocalContext.current
             if (game.platformIds.any { it in EMULATED_PLATFORMS }) {
                 PixelButton(
@@ -429,5 +458,19 @@ private fun launchEmulator(context: android.content.Context, gameId: Int, name: 
         context.startActivity(intent)
     } catch (e: android.content.ActivityNotFoundException) {
         android.widget.Toast.makeText(context, R.string.emulator_missing, android.widget.Toast.LENGTH_LONG).show()
+    }
+}
+
+@Composable
+fun GameStatTile(value: String, label: String, accent: androidx.compose.ui.graphics.Color, modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .background(Panel, RoundedCornerShape(8.dp))
+            .border(2.dp, Line, RoundedCornerShape(8.dp))
+            .padding(vertical = 10.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(value, color = accent, fontFamily = Pixel, fontSize = 16.sp)
+        Text(label, color = Muted, fontFamily = Vt, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
     }
 }
