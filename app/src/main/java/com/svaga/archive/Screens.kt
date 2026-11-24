@@ -522,28 +522,6 @@ fun HomeScreen(vm: AppViewModel, onOpen: (Int) -> Unit, onGo: (String) -> Unit) 
     var showFilters by rememberSaveable { mutableStateOf(false) }
     val searching = query.trim().length >= 2
 
-        // Лента "В тренде"
-        if (!searching && vm.browse.isNotEmpty()) {
-            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                Text(
-                    "В тренде",
-                    color = Amber,
-                    fontFamily = Pixel,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-                Row(
-                    Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    vm.browse.take(8).forEach { game ->
-                        TrendingCard(game, onClick = { onOpen(game.id) })
-                    }
-                }
-            }
-        }
 
     val baseList: List<Game>? = if (searching) vm.searchResults?.filter { it.matches(vm.filter) } else vm.browse
     val list: List<Game>? = if (vm.hideAdded) baseList?.filter { vm.library[it.id]?.status == null } else baseList
@@ -627,6 +605,29 @@ fun HomeScreen(vm: AppViewModel, onOpen: (Int) -> Unit, onGo: (String) -> Unit) 
                 },
                 onDismiss = { showPlatformPicker = false },
             )
+        }
+
+        // Лента "В тренде"
+        if (!searching && vm.browse.isNotEmpty()) {
+            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Text(
+                    "В тренде",
+                    color = Amber,
+                    fontFamily = Pixel,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+                Row(
+                    Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    vm.browse.take(8).forEach { game ->
+                        TrendingCard(game, onClick = { onOpen(game.id) })
+                    }
+                }
+            }
         }
 
         Box(Modifier.weight(1f).fillMaxWidth()) {
