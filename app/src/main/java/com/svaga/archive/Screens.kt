@@ -225,6 +225,7 @@ fun MainNav(vm: AppViewModel) {
             )
         }
         composable("admin") { AdminScreen(vm, onBack = { nav.popBackStack() }) }
+        composable("news") { NewsScreen(vm, onBack = { nav.popBackStack() }, onOpenGame = { gid -> nav.navigate("game/$gid") }) }
     }
 }
 
@@ -942,5 +943,22 @@ fun LibraryRow(item: LibraryItem, game: Game?, onClick: () -> Unit) {
                 item.rating?.let { Text("$it/10", color = Amber, fontFamily = Vt, fontSize = 17.sp) }
             }
         }
+    }
+}
+
+@Composable
+fun NewsScreen(vm: AppViewModel, onBack: () -> Unit, onOpenGame: (Int) -> Unit) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Bg)
+            .verticalScroll(rememberScrollState())
+            .padding(12.dp),
+    ) {
+        PixelButton("< " + stringResource(R.string.back), onBack)
+        Spacer(Modifier.height(16.dp))
+        Text("Новости", color = Cyan, fontFamily = Pixel, fontSize = 20.sp)
+        Spacer(Modifier.height(16.dp))
+        Text("Скоро здесь будут новости Svaga Archive", color = Muted, fontFamily = Vt, fontSize = 17.sp)
     }
 }
