@@ -607,28 +607,6 @@ fun HomeScreen(vm: AppViewModel, onOpen: (Int) -> Unit, onGo: (String) -> Unit) 
             )
         }
 
-        // Лента "В тренде"
-        if (!searching && vm.browse.isNotEmpty()) {
-            Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                Text(
-                    "В тренде",
-                    color = Amber,
-                    fontFamily = Pixel,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-                Row(
-                    Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    vm.browse.take(8).forEach { game ->
-                        TrendingCard(game, onClick = { onOpen(game.id) })
-                    }
-                }
-            }
-        }
 
         Box(Modifier.weight(1f).fillMaxWidth()) {
             when {
@@ -756,30 +734,6 @@ fun Cover(url: String?, modifier: Modifier) {
     }
 }
 
-@Composable
-fun TrendingCard(game: Game, onClick: () -> Unit) {
-    Column(
-        Modifier
-            .width(120.dp)
-            .background(Panel)
-            .border(2.dp, Line)
-            .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box {
-            Cover(game.cover, Modifier.fillMaxWidth().aspectRatio(0.75f))
-        }
-        Text(
-            game.name,
-            color = Ink,
-            fontFamily = Pixel,
-            fontSize = 8.sp,
-            maxLines = 2,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp),
-            textAlign = TextAlign.Center,
-        )
-    }
-}
 
 @Composable
 fun GameCard(game: Game, status: String? = null, onClick: () -> Unit) {
