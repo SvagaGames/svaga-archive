@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tagline">Oyun kütüphanesi</string>
-    <string name="tab_home">ANA SAYFA</string>
-    <string name="tab_library">OYUNLAR</string>
-    <string name="tab_profile">PROFİL</string>
+    <string name="tab_home">Ana sayfa</string>
+    <string name="tab_library">Oyunlar</string>
+    <string name="tab_profile">Profi̇l</string>
     <string name="login">GİRİŞ YAP</string>
     <string name="register">KAYIT OL</string>
     <string name="email">E-posta</string>
@@ -90,7 +90,7 @@
     <string name="theme_system">Sistem</string>
     <string name="theme_dark">Koyu</string>
     <string name="theme_light">Açık</string>
-    <string name="tab_people">KİŞİLER</string>
+    <string name="tab_people">Ki̇şi̇ler</string>
     <string name="people_friends">Arkadaşlar</string>
     <string name="people_requests">İstekler</string>
     <string name="people_all">Herkes</string>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tagline">Spielebibliothek</string>
-    <string name="tab_home">START</string>
-    <string name="tab_library">SPIELE</string>
-    <string name="tab_profile">PROFIL</string>
+    <string name="tab_home">Start</string>
+    <string name="tab_library">Spiele</string>
+    <string name="tab_profile">Profil</string>
     <string name="login">ANMELDEN</string>
     <string name="register">REGISTRIEREN</string>
     <string name="email">E-Mail</string>
@@ -90,7 +90,7 @@
     <string name="theme_system">System</string>
     <string name="theme_dark">Dunkel</string>
     <string name="theme_light">Hell</string>
-    <string name="tab_people">LEUTE</string>
+    <string name="tab_people">Leute</string>
     <string name="people_friends">Freunde</string>
     <string name="people_requests">Anfragen</string>
     <string name="people_all">Alle</string>

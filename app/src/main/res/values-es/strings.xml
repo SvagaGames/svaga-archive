@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tagline">Biblioteca de juegos</string>
-    <string name="tab_home">INICIO</string>
-    <string name="tab_library">JUEGOS</string>
-    <string name="tab_profile">PERFIL</string>
+    <string name="tab_home">Inicio</string>
+    <string name="tab_library">Juegos</string>
+    <string name="tab_profile">Perfil</string>
     <string name="login">ENTRAR</string>
     <string name="register">REGISTRARSE</string>
     <string name="email">Correo</string>
@@ -90,7 +90,7 @@
     <string name="theme_system">Sistema</string>
     <string name="theme_dark">Oscuro</string>
     <string name="theme_light">Claro</string>
-    <string name="tab_people">GENTE</string>
+    <string name="tab_people">Gente</string>
     <string name="people_friends">Amigos</string>
     <string name="people_requests">Solicitudes</string>
     <string name="people_all">Todos</string>

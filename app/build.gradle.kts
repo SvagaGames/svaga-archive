@@ -22,8 +22,8 @@ android {
         applicationId = "com.svaga.archive"
         minSdk = 26
         targetSdk = 34
-        versionCode = 10
-        versionName = "0.6.2"
+        versionCode = 20
+        versionName = "1.0.0"
     }
 
     if (hasKey) {
@@ -70,6 +70,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("io.coil-kt:coil-compose:2.7.0")

@@ -203,6 +203,33 @@ data class NewGame(
     val platformIds: List<Int>,
 )
 
+data class ActivityDay(val day: String, val count: Int)
+
+data class FriendEvent(
+    val userId: String,
+    val name: String,
+    val avatarVersion: Int,
+    val gameId: Int,
+    val status: String?,
+    val rating: Int?,
+    val favorite: Boolean,
+    val at: String,
+)
+
+data class NewsItem(
+    val id: Long,
+    val title: String,
+    val body: String,
+    val imageUrl: String?,
+    val gameId: Int?,
+    val author: String?,
+    val createdAt: String,
+)
+
+data class PlaytimeItem(val gameId: Int, val seconds: Long, val sessions: Int, val lastPlayed: String)
+
+data class PlaytimeResult(val totalSeconds: Long, val items: List<PlaytimeItem>)
+
 fun avatarUrl(userId: String, version: Int) = "$BASE_URL/v1/users/$userId/avatar?v=$version"
 
 fun formatDate(iso: String?): String {
@@ -874,6 +901,62 @@ class ApiClient(private val store: TokenStore) {
             levelFrom = o.optInt("levelFrom", 0),
             levelTo = o.optInt("levelTo", 100),
             featured = (o.optJSONArray("featured") ?: JSONArray()).objects().map { FeaturedAch(it.optString("code"), it.optInt("tier", 1)) },
+        )
+    }
+
+    // ---- activity calendar, friends' feed, news, play time (server 0.8.0; older servers answer 404) ----
+    suspend fun activity(userId: String?, days: Int = 182): List<ActivityDay> = io {
+        val path = if (userId == null) "/v1/me/activity?days=$days" else "/v1/users/$userId/activity?days=$days"
+        (call("GET", path).optJSONArray("days") ?: JSONArray()).objects().map { ActivityDay(it.optString("day"), it.optInt("count")) }
+    }
+
+    suspend fun friendsFeed(offset: Int = 0): List<FriendEvent> = io {
+        (call("GET", "/v1/feed/friends?offset=$offset").optJSONArray("items") ?: JSONArray()).objects().map {
+            FriendEvent(
+                userId = it.optString("userId"),
+                name = it.optString("name"),
+                avatarVersion = it.optInt("avatarVersion"),
+                gameId = it.optInt("gameId"),
+                status = it.str("status"),
+                rating = it.intOrNull("rating"),
+                favorite = it.optBoolean("favorite"),
+                at = it.optString("at"),
+            )
+        }
+    }
+
+    private fun parseNews(it: JSONObject) = NewsItem(
+        id = it.optLong("id"),
+        title = it.optString("title"),
+        body = it.optString("body"),
+        imageUrl = it.str("imageUrl"),
+        gameId = it.intOrNull("gameId"),
+        author = it.str("author"),
+        createdAt = it.optString("createdAt"),
+    )
+
+    suspend fun news(offset: Int = 0): List<NewsItem> = io {
+        (call("GET", "/v1/news?offset=$offset").optJSONArray("items") ?: JSONArray()).objects().map { parseNews(it) }
+    }
+
+    suspend fun postNews(title: String, body: String, imageUrl: String?): NewsItem = io {
+        val o = JSONObject().put("title", title).put("body", body)
+        if (!imageUrl.isNullOrBlank()) o.put("imageUrl", imageUrl)
+        parseNews(call("POST", "/v1/news", o))
+    }
+
+    suspend fun deleteNews(id: Long) = io {
+        call("DELETE", "/v1/news/$id")
+        Unit
+    }
+
+    suspend fun playtime(): PlaytimeResult = io {
+        val o = call("GET", "/v1/me/playtime")
+        PlaytimeResult(
+            totalSeconds = o.optLong("totalSeconds"),
+            items = (o.optJSONArray("items") ?: JSONArray()).objects().map {
+                PlaytimeItem(it.optInt("gameId"), it.optLong("seconds"), it.optInt("sessions"), it.optString("lastPlayed"))
+            },
         )
     }
 }

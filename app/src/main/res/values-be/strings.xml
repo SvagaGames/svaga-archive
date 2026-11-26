@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tagline">Бібліятэка гульняў</string>
-    <string name="tab_home">ГАЛОЎНАЯ</string>
-    <string name="tab_library">ГУЛЬНІ</string>
-    <string name="tab_profile">ПРАФІЛЬ</string>
+    <string name="tab_home">Галоўная</string>
+    <string name="tab_library">Гульні</string>
+    <string name="tab_profile">Прафіль</string>
     <string name="login">УВАЙСЦІ</string>
     <string name="register">РЭГІСТРАЦЫЯ</string>
     <string name="email">Пошта</string>
@@ -90,7 +90,7 @@
     <string name="theme_system">Сістэмная</string>
     <string name="theme_dark">Цёмная</string>
     <string name="theme_light">Светлая</string>
-    <string name="tab_people">ЛЮДЗІ</string>
+    <string name="tab_people">Людзі</string>
     <string name="people_friends">Сябры</string>
     <string name="people_requests">Запыты</string>
     <string name="people_all">Усе гульцы</string>

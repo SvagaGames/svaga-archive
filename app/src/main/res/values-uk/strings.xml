@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tagline">Бібліотека ігор</string>
-    <string name="tab_home">ГОЛОВНА</string>
-    <string name="tab_library">ІГРИ</string>
-    <string name="tab_profile">ПРОФІЛЬ</string>
+    <string name="tab_home">Головна</string>
+    <string name="tab_library">Ігри</string>
+    <string name="tab_profile">Профіль</string>
     <string name="login">УВІЙТИ</string>
     <string name="register">РЕЄСТРАЦІЯ</string>
     <string name="email">Пошта</string>
@@ -90,7 +90,7 @@
     <string name="theme_system">Системна</string>
     <string name="theme_dark">Темна</string>
     <string name="theme_light">Світла</string>
-    <string name="tab_people">ЛЮДИ</string>
+    <string name="tab_people">Люди</string>
     <string name="people_friends">Друзі</string>
     <string name="people_requests">Запити</string>
     <string name="people_all">Усі гравці</string>

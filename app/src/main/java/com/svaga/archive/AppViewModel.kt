@@ -176,6 +176,197 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private var browseJob: Job? = null
     private var bgJob: Job? = null
 
+    // ---------- redesign: home rows, release calendar, activity, play time, friends' feed, news ----------
+    /** Horizontal rows on the home screen, by catalog section. */
+    val homeRows = mutableStateMapOf<String, List<Game>>()
+    var homeRowsError by mutableStateOf(false)
+        private set
+
+    fun loadHomeRows(force: Boolean = false) {
+        listOf("popular", "svaga", "new", "top", "retro").forEach { key ->
+            if (!force && homeRows.containsKey(key)) return@forEach
+            viewModelScope.launch {
+                try {
+                    val r = api.browse(key, null, null, null, null, null, 0)
+                    r.items.forEach { gamesCache[it.id] = it }
+                    homeRows[key] = r.items
+                    homeRowsError = false
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    homeRowsError = true
+                    handle(e)
+                }
+            }
+        }
+    }
+
+    /** Upcoming releases for the calendar (catalog section "upcoming"). */
+    var upcoming by mutableStateOf<List<Game>>(emptyList())
+        private set
+    var upcomingLoading by mutableStateOf(false)
+        private set
+    var upcomingMore by mutableStateOf(false)
+        private set
+
+    fun loadUpcoming(append: Boolean = false) {
+        if (upcomingLoading || (append && !upcomingMore)) return
+        viewModelScope.launch {
+            upcomingLoading = true
+            try {
+                val r = api.browse("upcoming", null, null, null, null, null, if (append) upcoming.size else 0)
+                r.items.forEach { gamesCache[it.id] = it }
+                upcoming = if (append) upcoming + r.items.filter { g -> upcoming.none { it.id == g.id } } else r.items
+                upcomingMore = r.rawCount >= 30
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            } finally {
+                upcomingLoading = false
+            }
+        }
+    }
+
+    /** Own activity per day (null: not loaded yet or the server is older than 0.8.0). */
+    var activity by mutableStateOf<List<ActivityDay>?>(null)
+        private set
+    var viewedActivity by mutableStateOf<List<ActivityDay>?>(null)
+        private set
+
+    fun loadActivity() {
+        viewModelScope.launch {
+            try {
+                activity = api.activity(null, 182)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            }
+        }
+    }
+
+    fun loadActivityOf(id: String) {
+        viewedActivity = null
+        viewModelScope.launch {
+            try {
+                viewedActivity = api.activity(id, 182)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            }
+        }
+    }
+
+    /** Total play time from Svaga Emulator in seconds (null: unknown). */
+    var playSeconds by mutableStateOf<Long?>(null)
+        private set
+    val playtimeByGame = mutableStateMapOf<Int, Long>()
+
+    fun loadPlaytime() {
+        viewModelScope.launch {
+            try {
+                val r = api.playtime()
+                playSeconds = r.totalSeconds
+                playtimeByGame.clear()
+                r.items.forEach { playtimeByGame[it.gameId] = it.seconds }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            }
+        }
+    }
+
+    var friendFeed by mutableStateOf<List<FriendEvent>>(emptyList())
+        private set
+    var friendFeedLoading by mutableStateOf(false)
+        private set
+    var friendFeedMore by mutableStateOf(false)
+        private set
+    var friendFeedLoaded by mutableStateOf(false)
+        private set
+
+    fun loadFriendFeed(append: Boolean = false) {
+        if (friendFeedLoading) return
+        viewModelScope.launch {
+            friendFeedLoading = true
+            try {
+                val list = api.friendsFeed(if (append) friendFeed.size else 0)
+                friendFeed = if (append) friendFeed + list else list
+                friendFeedMore = list.size >= 30
+                val missing = list.map { it.gameId }.distinct().filter { !gamesCache.containsKey(it) }
+                missing.chunked(50).forEach { chunk -> api.gamesByIds(chunk).forEach { gamesCache[it.id] = it } }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            } finally {
+                friendFeedLoading = false
+                friendFeedLoaded = true
+            }
+        }
+    }
+
+    var news by mutableStateOf<List<NewsItem>>(emptyList())
+        private set
+    var newsLoading by mutableStateOf(false)
+        private set
+    var newsMore by mutableStateOf(false)
+        private set
+    var newsLoaded by mutableStateOf(false)
+        private set
+    var newsError by mutableStateOf<Int?>(null)
+
+    fun loadNews(append: Boolean = false) {
+        if (newsLoading) return
+        viewModelScope.launch {
+            newsLoading = true
+            try {
+                val list = api.news(if (append) news.size else 0)
+                news = if (append) news + list else list
+                newsMore = list.size >= 20
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            } finally {
+                newsLoading = false
+                newsLoaded = true
+            }
+        }
+    }
+
+    fun postNews(title: String, body: String, imageUrl: String, onDone: () -> Unit) {
+        newsError = null
+        viewModelScope.launch {
+            try {
+                val item = api.postNews(title.trim(), body.trim(), imageUrl.trim().ifBlank { null })
+                news = listOf(item) + news
+                onDone()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                newsError = errorRes(e)
+                handle(e)
+            }
+        }
+    }
+
+    fun deleteNews(id: Long) {
+        viewModelScope.launch {
+            try {
+                api.deleteNews(id)
+                news = news.filter { it.id != id }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                handle(e)
+            }
+        }
+    }
+
     init {
         if (loggedIn) {
             offlineStore.loadGames().forEach { gamesCache[it.id] = it }
@@ -321,6 +512,10 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun clearAuthError() {
+        authError = null
+    }
+
     fun leaveReset() {
         resetStage = 0
         authError = null
@@ -371,6 +566,16 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         toast = null
         toastQueue.clear()
         authError = null
+        homeRows.clear()
+        upcoming = emptyList()
+        activity = null
+        viewedActivity = null
+        playSeconds = null
+        playtimeByGame.clear()
+        friendFeed = emptyList()
+        friendFeedLoaded = false
+        news = emptyList()
+        newsLoaded = false
     }
 
     private fun handle(e: Exception) {
@@ -434,6 +639,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         loadLibrary()
         loadAchievements()
         loadFriends()
+        loadHomeRows()
+        loadActivity()
+        loadPlaytime()
         startBackground()
     }
 
