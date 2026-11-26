@@ -274,6 +274,8 @@ data class RaSummary(
 
 data class RaState(val configured: Boolean, val linked: Boolean, val summary: RaSummary?)
 
+data class EmulatorInfo(val enabled: Boolean, val romUrl: String?, val romName: String?)
+
 data class RaImportResult(val added: Int, val updated: Int, val unmatched: List<String>)
 
 fun avatarUrl(userId: String, version: Int) = "$BASE_URL/v1/users/$userId/avatar?v=$version"
@@ -1115,6 +1117,21 @@ class ApiClient(private val store: TokenStore) {
         val o = call("POST", "/v1/me/ra/import")
         RaImportResult(o.optInt("added"), o.optInt("updated"), (o.optJSONArray("unmatched") ?: JSONArray()).strings())
     }
+
+    // ---- Svaga Emulator per game ----
+    private fun parseEmu(o: JSONObject): EmulatorInfo {
+        val d = o.optJSONObject("download")
+        return EmulatorInfo(o.optBoolean("enabled"), d?.str("url"), d?.str("name"))
+    }
+
+    suspend fun emulatorInfo(gameId: Int): EmulatorInfo = io { parseEmu(call("GET", "/v1/games/$gameId/emulator")) }
+
+    suspend fun setEmulator(gameId: Int, enabled: Boolean, romUrl: String, romName: String): EmulatorInfo = io {
+        parseEmu(call("PUT", "/v1/admin/games/$gameId/emulator", JSONObject().put("enabled", enabled).put("romUrl", romUrl).put("romName", romName)))
+    }
+
+    /** A separate session for Svaga Emulator (it signs in through this app). */
+    suspend fun handoff(): JSONObject = io { call("POST", "/v1/auth/handoff") }
 }
 
 /** Games the server found when it refused to add a duplicate. */

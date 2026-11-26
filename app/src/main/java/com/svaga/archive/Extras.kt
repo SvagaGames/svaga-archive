@@ -79,6 +79,25 @@ class Extras(private val vm: AppViewModel) {
         }
     }
 
+    // ---------- Svaga Emulator per game ----------
+    val emulator = mutableStateMapOf<Int, EmulatorInfo>()
+    var emuBusy by mutableStateOf(false)
+        private set
+    var emuError by mutableStateOf<Int?>(null)
+        private set
+
+    fun loadEmulator(gameId: Int) = run { emulator[gameId] = api.emulatorInfo(gameId) }
+
+    fun saveEmulator(gameId: Int, enabled: Boolean, romUrl: String, romName: String, onDone: () -> Unit) {
+        emuBusy = true
+        emuError = null
+        run({ emuError = it; emuBusy = false }) {
+            emulator[gameId] = api.setEmulator(gameId, enabled, romUrl.trim(), romName.trim())
+            emuBusy = false
+            onDone()
+        }
+    }
+
     // ---------- Steam ----------
     var steam by mutableStateOf<SteamStatus?>(null)
         private set
@@ -172,6 +191,7 @@ class Extras(private val vm: AppViewModel) {
         ra = null
         raImport = null
         userRa.clear()
+        emulator.clear()
         ctx.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE).edit().clear().apply()
         vm.viewModelScope.launch { runCatching { NowPlayingWidget().updateAll(ctx) } }
     }

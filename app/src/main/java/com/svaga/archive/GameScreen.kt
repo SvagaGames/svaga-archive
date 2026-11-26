@@ -48,9 +48,6 @@ import coil.compose.AsyncImage
 import java.util.Locale
 
 /** IGDB platform ids the Svaga Emulator can run. */
-private val EMULATED_PLATFORMS = setOf(
-    18, 19, 29, 33, 22, 24, 64, 35, 86, 119, 120, 57, 123, 7, 4, 20, 38, 23, 32, 50, 59, 66, 60, 61, 62, 87, 67, 68, 133, 70, 166, 78, 30, 52, 79, 80, 27,
-)
 
 private fun launchEmulator(context: Context, gameId: Int, name: String) {
     val intent = Intent("com.svaga.emulator.PLAY")
@@ -73,6 +70,7 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
         vm.loadComments(id)
         vm.loadRelated(id)
         vm.loadRu(id)
+        vm.extras.loadEmulator(id)
     }
     val game = vm.gamesCache[id]
     LaunchedEffect(id, game?.variantIds) { vm.loadGameStats(id) }
@@ -137,7 +135,8 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                     Spacer(Modifier.width(10.dp))
                     IconBtn(Icons.Filled.Share, { share = true }, size = 50.dp)
                 }
-                if (game.platformIds.any { it in EMULATED_PLATFORMS }) {
+                // the Creator decides which games get the Svaga Emulator button
+                if (vm.extras.emulator[id]?.enabled == true) {
                     Spacer(Modifier.height(10.dp))
                     SvButton(
                         stringResource(R.string.play_in_emulator),
@@ -146,6 +145,10 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                         kind = BtnKind.Secondary,
                         icon = Icons.Filled.PlayArrow,
                     )
+                }
+                if (vm.role == "creator") {
+                    Spacer(Modifier.height(10.dp))
+                    EmulatorAdminCard(vm, id)
                 }
                 vm.playtimeByGame[id]?.let { s ->
                     Spacer(Modifier.height(8.dp))

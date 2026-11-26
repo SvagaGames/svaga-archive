@@ -29,6 +29,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Svaga Emulator signs in through this app (checked: same signing key + user confirmation) -->
+        <activity
+            android:name=".EmulatorAuthActivity"
+            android:exported="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="com.svaga.archive.AUTHORIZE_EMULATOR" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.files"

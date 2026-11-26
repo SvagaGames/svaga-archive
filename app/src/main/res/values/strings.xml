@@ -48,7 +48,7 @@
     <string name="profile_account">ACCOUNT</string>
     <string name="logout">LOG OUT</string>
     <string name="data_credit">Game data: IGDB.com</string>
-    <string name="version">Svaga Games, v1.2.0</string>
+    <string name="version">Svaga Games, v1.2.1</string>
 
     <string name="err_network">No connection to the server</string>
     <string name="err_invalid_credentials">Wrong e-mail or password</string>
@@ -527,4 +527,17 @@
     <string name="delete_forever">Delete forever</string>
     <string name="integrations">Collection and imports</string>
     <string name="privacy_policy">Privacy policy</string>
+    <string name="emu_admin_title">Svaga Emulator (Creator)</string>
+    <string name="emu_admin_off">Button is hidden for this game</string>
+    <string name="emu_admin_on">Button is shown</string>
+    <string name="emu_admin_on_download">Button is shown, the game can be downloaded</string>
+    <string name="emu_admin_button">Show \"Play in Svaga Emulator\"</string>
+    <string name="emu_admin_url">Game file link (https, optional)</string>
+    <string name="emu_admin_name">File name with extension, e.g. Game (World).nes</string>
+    <string name="emu_admin_hint">The emulator downloads this file and links it to the game. Only files you may distribute: homebrew, public domain, your own games and translations.</string>
+    <string name="emu_auth_title">Sign in to Svaga Emulator</string>
+    <string name="emu_auth_text">Svaga Emulator will be signed in as %1$s: play time goes to your profile, ratings and players are available.</string>
+    <string name="emu_auth_signin_first">Sign in to Svaga Archive first, then try again from the emulator.</string>
+    <string name="emu_auth_untrusted">This request did not come from the official Svaga Emulator.</string>
+    <string name="emu_auth_allow">Allow</string>
 </resources>

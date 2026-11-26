@@ -694,3 +694,48 @@ fun UpdatesRow() {
         },
     )
 }
+
+// =====================================================================
+// Creator: Svaga Emulator button and download for a game
+// =====================================================================
+
+@Composable
+fun EmulatorAdminCard(vm: AppViewModel, gameId: Int) {
+    val ex = vm.extras
+    val info = ex.emulator[gameId]
+    var open by remember { mutableStateOf(false) }
+    var enabled by remember(info) { mutableStateOf(info?.enabled ?: false) }
+    var url by remember(info) { mutableStateOf(info?.romUrl ?: "") }
+    var name by remember(info) { mutableStateOf(info?.romName ?: "") }
+    SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), border = Amber.copy(alpha = 0.5f)) {
+        Row(Modifier.fillMaxWidth().clickable { open = !open }, verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Body(stringResource(R.string.emu_admin_title), color = Amber, weight = FontWeight.SemiBold, size = 14.sp)
+                Caption(
+                    when {
+                        info?.enabled != true -> stringResource(R.string.emu_admin_off)
+                        info.romUrl != null -> stringResource(R.string.emu_admin_on_download)
+                        else -> stringResource(R.string.emu_admin_on)
+                    },
+                )
+            }
+            Text(if (open) "▲" else "▼", color = Amber)
+        }
+        if (open) {
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Body(stringResource(R.string.emu_admin_button), Modifier.weight(1f), size = 14.sp)
+                Switch(enabled, { enabled = it }, colors = SwitchDefaults.colors(checkedTrackColor = Amber, checkedThumbColor = Color.White))
+            }
+            Spacer(Modifier.height(8.dp))
+            SvField(url, { url = it.trim().take(500) }, stringResource(R.string.emu_admin_url))
+            Spacer(Modifier.height(8.dp))
+            SvField(name, { name = it.take(120) }, stringResource(R.string.emu_admin_name))
+            Spacer(Modifier.height(6.dp))
+            Caption(stringResource(R.string.emu_admin_hint), color = Faint, maxLines = 5)
+            ex.emuError?.let { Body(stringResource(it), color = Red, size = 14.sp) }
+            Spacer(Modifier.height(10.dp))
+            SvButton(stringResource(R.string.save), { ex.saveEmulator(gameId, enabled, url, name) { open = false } }, Modifier.fillMaxWidth(), busy = ex.emuBusy, accent = Amber)
+        }
+    }
+}

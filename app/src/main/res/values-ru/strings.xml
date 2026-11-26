@@ -48,7 +48,7 @@
     <string name="profile_account">АККАУНТ</string>
     <string name="logout">ВЫЙТИ</string>
     <string name="data_credit">Данные об играх: IGDB.com</string>
-    <string name="version">Svaga Games, v1.2.0</string>
+    <string name="version">Svaga Games, v1.2.1</string>
 
     <string name="err_network">Нет связи с сервером</string>
     <string name="err_invalid_credentials">Неверная почта или пароль</string>
@@ -527,4 +527,17 @@
     <string name="delete_forever">Удалить навсегда</string>
     <string name="integrations">Коллекция и импорт</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="emu_admin_title">Svaga Emulator (Создатель)</string>
+    <string name="emu_admin_off">Кнопка для этой игры скрыта</string>
+    <string name="emu_admin_on">Кнопка показывается</string>
+    <string name="emu_admin_on_download">Кнопка показывается, игру можно скачать</string>
+    <string name="emu_admin_button">Показывать «Играть в Svaga Emulator»</string>
+    <string name="emu_admin_url">Ссылка на файл игры (https, необязательно)</string>
+    <string name="emu_admin_name">Имя файла с расширением, например Game (World).nes</string>
+    <string name="emu_admin_hint">Эмулятор скачает этот файл и сам привяжет его к игре. Только то, что можно распространять: homebrew, общественное достояние, ваши игры и переводы.</string>
+    <string name="emu_auth_title">Вход в Svaga Emulator</string>
+    <string name="emu_auth_text">Svaga Emulator войдёт как %1$s: время в играх пойдёт в профиль, станут доступны оценки и игроки.</string>
+    <string name="emu_auth_signin_first">Сначала войдите в Svaga Archive, потом повторите из эмулятора.</string>
+    <string name="emu_auth_untrusted">Запрос пришёл не от официального Svaga Emulator.</string>
+    <string name="emu_auth_allow">Разрешить</string>
 </resources>
