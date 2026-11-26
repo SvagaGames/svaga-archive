@@ -55,6 +55,32 @@ private val ACH_TITLE: Map<String, Int> = mapOf(
     "svaga_explorer" to R.string.ach2_svaga_explorer_t,
     "supporter" to R.string.ach2_supporter_t,
     "anniversary" to R.string.ach2_anniversary_t,
+    "player" to R.string.ach2_player_t,
+    "planner" to R.string.ach2_planner_t,
+    "favorite" to R.string.ach2_favorite_t,
+    "quitter" to R.string.ach2_quitter_t,
+    "masterpiece" to R.string.ach2_masterpiece_t,
+    "harsh" to R.string.ach2_harsh_t,
+    "chronicler" to R.string.ach2_chronicler_t,
+    "marathon" to R.string.ach2_marathon_t,
+    "emulator" to R.string.ach2_emulator_t,
+    "shelf" to R.string.ach2_shelf_t,
+    "cib" to R.string.ach2_cib_t,
+    "oldschool" to R.string.ach2_oldschool_t,
+    "archaeologist" to R.string.ach2_archaeologist_t,
+    "mobile" to R.string.ach2_mobile_t,
+    "archivist" to R.string.ach2_archivist_t,
+    "cartographer" to R.string.ach2_cartographer_t,
+    "localizer" to R.string.ach2_localizer_t,
+    "generous" to R.string.ach2_generous_t,
+    "veteran" to R.string.ach2_veteran_t,
+    "retrohunter" to R.string.ach2_retrohunter_t,
+    "full_house" to R.string.ach2_full_house_t,
+    "perfectionist" to R.string.ach2_perfectionist_t,
+    "ra_link" to R.string.ach2_ra_link_t,
+    "steam_link" to R.string.ach2_steam_link_t,
+    "svaga_fan" to R.string.ach2_svaga_fan_t,
+    "hidden_gem" to R.string.ach2_hidden_gem_t,
 )
 
 private val ACH_DESC: Map<String, Int> = mapOf(
@@ -70,6 +96,32 @@ private val ACH_DESC: Map<String, Int> = mapOf(
     "svaga_explorer" to R.string.ach2_svaga_explorer_d,
     "supporter" to R.string.ach2_supporter_d,
     "anniversary" to R.string.ach2_anniversary_d,
+    "player" to R.string.ach2_player_d,
+    "planner" to R.string.ach2_planner_d,
+    "favorite" to R.string.ach2_favorite_d,
+    "quitter" to R.string.ach2_quitter_d,
+    "masterpiece" to R.string.ach2_masterpiece_d,
+    "harsh" to R.string.ach2_harsh_d,
+    "chronicler" to R.string.ach2_chronicler_d,
+    "marathon" to R.string.ach2_marathon_d,
+    "emulator" to R.string.ach2_emulator_d,
+    "shelf" to R.string.ach2_shelf_d,
+    "cib" to R.string.ach2_cib_d,
+    "oldschool" to R.string.ach2_oldschool_d,
+    "archaeologist" to R.string.ach2_archaeologist_d,
+    "mobile" to R.string.ach2_mobile_d,
+    "archivist" to R.string.ach2_archivist_d,
+    "cartographer" to R.string.ach2_cartographer_d,
+    "localizer" to R.string.ach2_localizer_d,
+    "generous" to R.string.ach2_generous_d,
+    "veteran" to R.string.ach2_veteran_d,
+    "retrohunter" to R.string.ach2_retrohunter_d,
+    "full_house" to R.string.ach2_full_house_d,
+    "perfectionist" to R.string.ach2_perfectionist_d,
+    "ra_link" to R.string.ach2_ra_link_d,
+    "steam_link" to R.string.ach2_steam_link_d,
+    "svaga_fan" to R.string.ach2_svaga_fan_d,
+    "hidden_gem" to R.string.ach2_hidden_gem_d,
 )
 
 private val EXPLORER_DESC = listOf(
@@ -84,7 +136,7 @@ private val LEVEL_NAMES = listOf(
 
 private val TIER_NAMES = listOf(R.string.tier_1, R.string.tier_2, R.string.tier_3, R.string.tier_4, R.string.tier_5)
 
-val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "secret")
+val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "secret")
 
 @Composable
 fun achTitle(code: String): String = ACH_TITLE[code]?.let { stringResource(it) } ?: code
@@ -94,7 +146,7 @@ fun achTitle(code: String): String = ACH_TITLE[code]?.let { stringResource(it) }
 fun achDescription(code: String, tier: Int, goal: Int): String {
     if (code == "explorer") return stringResource(EXPLORER_DESC[(tier - 1).coerceIn(0, 4)])
     val res = ACH_DESC[code] ?: return ""
-    return if (code in setOf("pioneer", "founder", "svaga_explorer", "supporter", "anniversary")) stringResource(res)
+    return if (code in setOf("pioneer", "founder", "svaga_explorer", "supporter", "anniversary", "full_house", "perfectionist", "ra_link", "steam_link", "svaga_fan", "hidden_gem")) stringResource(res)
     else stringResource(res, goal)
 }
 
