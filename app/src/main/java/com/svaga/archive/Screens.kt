@@ -962,3 +962,113 @@ fun NewsScreen(vm: AppViewModel, onBack: () -> Unit, onOpenGame: (Int) -> Unit) 
         Text("Скоро здесь будут новости Svaga Archive", color = Muted, fontFamily = Vt, fontSize = 17.sp)
     }
 }
+// ==========================================
+// НОВЫЙ ЭКРАН: ВОССТАНОВЛЕНИЕ ПАРОЛЯ
+// ==========================================
+
+@Composable
+fun ForgotPasswordDialog(
+    onDismiss: () -> Unit,
+    onSendCode: (String, (Boolean) -> Unit) -> Unit, // email, callback
+    onResetPassword: (String, String, String, (Boolean) -> Unit) -> Unit // email, code, newPass, callback
+) {
+    var step by remember { mutableIntStateOf(1) }
+    var email by remember { mutableStateOf("") }
+    var code by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorText by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = Color(0xFF1E293B),
+        titleContentColor = Color.White,
+        textContentColor = Color.LightGray,
+        title = { Text(if (step == 1) "Восстановление" else "Новый пароль") },
+        text = {
+            Column {
+                if (errorText != null) {
+                    Text(text = errorText!!, color = Color.Red, fontSize = 12.sp)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                if (step == 1) {
+                    Text("Введите email, указанный при регистрации.", fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Text("Мы отправили код на $email", fontSize = 14.sp)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = code,
+                        onValueChange = { code = it },
+                        label = { Text("Код из письма") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = newPassword,
+                        onValueChange = { newPassword = it },
+                        label = { Text("Новый пароль") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    isLoading = true
+                    errorText = null
+                    if (step == 1) {
+                        onSendCode(email) { success ->
+                            isLoading = false
+                            if (success) step = 2 else errorText = "Ошибка. Проверьте email."
+                        }
+                    } else {
+                        onResetPassword(email, code, newPassword) { success ->
+                            isLoading = false
+                            if (success) {
+                                onDismiss() // Закрываем окно при успехе
+                            } else {
+                                errorText = "Неверный код или пароль слишком короткий"
+                            }
+                        }
+                    }
+                },
+                enabled = !isLoading && (if (step == 1) email.isNotBlank() else code.isNotBlank() && newPassword.isNotBlank())
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                } else {
+                    Text(if (step == 1) "Получить код" else "Сменить пароль")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Отмена", color = Color.Gray)
+            }
+        }
+    )
+}
