@@ -304,6 +304,7 @@ fun AuthScreen(vm: AppViewModel) {
     var password by rememberSaveable { mutableStateOf("") }
     var name by rememberSaveable { mutableStateOf("") }
     var code by rememberSaveable { mutableStateOf("") }
+var showForgotDialog by remember { mutableStateOf(false) }
 
     Column(
         Modifier
@@ -439,7 +440,33 @@ fun AuthScreen(vm: AppViewModel) {
                 modifier = Modifier.clickable { mode = if (mode == 1) 0 else 1 }.padding(8.dp),
             )
             SocialLoginButtons(vm)
+        }        // 
+        TextButton(
+            onClick = { showForgotDialog = true },
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text(
+                text = "Забыли пароль?",
+                color = Cyan, // Использую твой цвет из кода
+                fontSize = 14.sp
+            )
         }
+
+        if (showForgotDialog) {
+            ForgotPasswordDialog(
+                onDismiss = { showForgotDialog = false },
+                onSendCode = { emailInput, callback ->
+                    // Вызов твоей ViewModel (vm передана в функцию AuthScreen)
+                    vm.forgotPassword(emailInput, callback)
+                },
+                onResetPassword = { emailInput, codeInput, newPass, callback ->
+                    // Вызов твоей ViewModel
+                    vm.resetPassword(emailInput, codeInput, newPass, callback)
+                }
+            )
+        }
+    } // 
+} // 
     }
 }
 
