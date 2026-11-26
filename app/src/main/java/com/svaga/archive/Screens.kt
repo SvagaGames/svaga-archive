@@ -1099,3 +1099,79 @@ fun ForgotPasswordDialog(
         }
     )
 }
+// ==========================================
+// БЛОК: ВОССТАНОВЛЕНИЕ ПАРОЛЯ
+// ==========================================
+
+@Composable
+fun ResetPasswordSection(vm: AppViewModel, email: String) {
+    if (vm.resetStage == 0) {
+        // Шаг 0: Кнопка "Забыли пароль?"
+        TextButton(
+            onClick = { vm.requestReset(email) },
+            enabled = !vm.authBusy && email.isNotBlank(),
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text(
+                text = "Забыли пароль?",
+                color = if (email.isNotBlank()) Cyan else Color.Gray,
+                fontSize = 14.sp
+            )
+        }
+    } 
+    else if (vm.resetStage == 1) {
+        // Шаг 1: Ввод кода и нового пароля
+        var codeInput by remember { mutableStateOf("") }
+        var newPassword by remember { mutableStateOf("") }
+
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Код отправлен на $email",
+                color = Color.White,
+                fontSize = 14.sp
+            )
+            Spacer(Modifier.height(12.dp))
+            
+            // Поле для кода
+            PixelField(codeInput, { codeInput = it }, "Код из письма")
+            Spacer(Modifier.height(8.dp))
+            
+            // Поле для нового пароля
+            PixelField(newPassword, { newPassword = it }, "Новый пароль")
+            Spacer(Modifier.height(16.dp))
+
+            if (vm.authBusy) {
+                CircularProgressIndicator(color = Cyan)
+            } else {
+                PixelButton(onClick = { vm.submitReset(email, codeInput, newPassword) }) {
+                    Text("Сменить пароль", color = Bg)
+                }
+            }
+            
+            TextButton(onClick = { vm.leaveReset() }) {
+                Text("Отмена", color = Color.Gray, fontSize = 14.sp)
+            }
+        }
+    } 
+    else if (vm.resetStage == 2) {
+        // Шаг 2: Успешная смена пароля
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Пароль успешно изменен!",
+                color = Color.Green,
+                fontSize = 16.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+            Spacer(Modifier.height(16.dp))
+            PixelButton(onClick = { vm.leaveReset() }) {
+                Text("Вернуться ко входу", color = Bg)
+            }
+        }
+    }
+}
