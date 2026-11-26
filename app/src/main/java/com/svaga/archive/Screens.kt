@@ -426,7 +426,7 @@ var showForgotDialog by remember { mutableStateOf(false) }
                 onClick = {
                     if (mode == 1) vm.register(email.trim(), password, name.trim())
                     else vm.login(email.trim(), password)
-                },
+                },ResetPasswordSection(vm, email)
                 filled = true,
                 enabled = !vm.authBusy && email.isNotBlank() && password.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth(),
