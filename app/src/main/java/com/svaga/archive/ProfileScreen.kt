@@ -101,26 +101,9 @@ private fun LevelBar(level: Int, sp: Int, from: Int, to: Int) {
 
 /** Achievement badge for the horizontal row on profiles. */
 @Composable
-fun AchBadge(code: String, tier: Int, modifier: Modifier = Modifier) {
-    val color = tierColor(tier)
-    Column(modifier.width(96.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            Modifier
-                .size(88.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Brush.verticalGradient(listOf(color.copy(alpha = 0.35f), Panel)))
-                .border(2.dp, color.copy(alpha = 0.8f), RoundedCornerShape(24.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Filled.Star, null, tint = color, modifier = Modifier.size(40.dp))
-            Text(
-                ROMAN.getOrElse(tier) { "" },
-                color = Color(0xFF071018),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).background(color, CircleShape).padding(horizontal = 6.dp, vertical = 1.dp),
-            )
-        }
+fun AchBadge(code: String, tier: Int, modifier: Modifier = Modifier, secret: Boolean = false) {
+    Column(modifier.width(100.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        AchievementArt(code, if (secret) 0 else tier, unlocked = true, size = 84.dp)
         Spacer(Modifier.height(6.dp))
         Text(achTitle(code), color = Ink, fontSize = 12.sp, maxLines = 2, textAlign = TextAlign.Center, lineHeight = 15.sp)
     }
@@ -219,7 +202,7 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
             Caption(stringResource(R.string.ach_none), Modifier.padding(horizontal = 16.dp))
         } else {
             LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(shownAch, key = { it.code }) { a -> AchBadge(a.code, a.tier, Modifier.clickable { nav.go(Routes.ACHIEVEMENTS) }) }
+                items(shownAch, key = { it.code }) { a -> AchBadge(a.code, a.tier, Modifier.clickable { nav.go(Routes.ACHIEVEMENTS) }, secret = a.secret) }
             }
         }
 

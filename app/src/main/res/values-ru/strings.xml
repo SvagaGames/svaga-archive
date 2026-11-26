@@ -48,7 +48,7 @@
     <string name="profile_account">АККАУНТ</string>
     <string name="logout">ВЫЙТИ</string>
     <string name="data_credit">Данные об играх: IGDB.com</string>
-    <string name="version">Svaga Games, v1.0.0</string>
+    <string name="version">Svaga Games, v1.1.0</string>
 
     <string name="err_network">Нет связи с сервером</string>
     <string name="err_invalid_credentials">Неверная почта или пароль</string>
@@ -429,4 +429,7 @@
     <string name="your_rating">Ваша оценка</string>
     <string name="translating">Переводим…</string>
     <string name="err_translation">Перевод сейчас недоступен. Попробуйте позже.</string>
+    <string name="ach_locked">Не открыто</string>
+    <string name="ach_pin">Показать в профиле</string>
+    <string name="ach_unpin">Убрать из профиля</string>
 </resources>

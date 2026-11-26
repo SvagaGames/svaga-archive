@@ -48,7 +48,7 @@
     <string name="profile_account">ACCOUNT</string>
     <string name="logout">LOG OUT</string>
     <string name="data_credit">Game data: IGDB.com</string>
-    <string name="version">Svaga Games, v1.0.0</string>
+    <string name="version">Svaga Games, v1.1.0</string>
 
     <string name="err_network">No connection to the server</string>
     <string name="err_invalid_credentials">Wrong e-mail or password</string>
@@ -429,4 +429,7 @@
     <string name="your_rating">Your rating</string>
     <string name="translating">Translating…</string>
     <string name="err_translation">Translation is unavailable right now. Try again later.</string>
+    <string name="ach_locked">Not unlocked</string>
+    <string name="ach_pin">Show on profile</string>
+    <string name="ach_unpin">Remove from profile</string>
 </resources>
