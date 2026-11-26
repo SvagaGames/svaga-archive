@@ -7,12 +7,19 @@ plugins {
 }
 
 // Permanent signing key: created once by setup-signing.sh and kept outside the project (so updates install over each other).
-val keyDir: String = System.getenv("SVAGA_KEYS") ?: "/root/svaga-keys"
+val keyDir: String = System.getenv("SVAGA_KEYS")
+    ?: listOf("/root/svaga/svaga1/svaga-keys", "/root/svaga-keys").firstOrNull { File("$it/keystore.properties").exists() }
+    ?: "/root/svaga/svaga1/svaga-keys"
 val keyProps = Properties().apply {
     val f = File("$keyDir/keystore.properties")
     if (f.exists()) f.inputStream().use { load(it) }
 }
-val hasKey = keyProps.getProperty("storeFile") != null
+// The folder may have been moved: if the stored path is gone, look for the same file next to keystore.properties.
+val keyFile: File? = keyProps.getProperty("storeFile")?.let { p ->
+    val f = File(p)
+    if (f.exists()) f else File(keyDir, f.name).takeIf { it.exists() }
+}
+val hasKey = keyFile != null
 
 android {
     namespace = "com.svaga.archive"
@@ -29,7 +36,7 @@ android {
     if (hasKey) {
         signingConfigs {
             create("svaga") {
-                storeFile = File(keyProps.getProperty("storeFile"))
+                storeFile = keyFile
                 storePassword = keyProps.getProperty("storePassword")
                 keyAlias = keyProps.getProperty("keyAlias")
                 keyPassword = keyProps.getProperty("keyPassword")
