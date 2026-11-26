@@ -9,6 +9,25 @@ jobs:
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
         with: { gradle-version: '8.9' }
+      # The permanent Svaga key (same as on the server) comes from repository secrets,
+      # so GitHub builds install over server builds and over each other.
+      - name: Signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.SVAGA_KEYSTORE_B64 }}
+          STORE_PASSWORD: ${{ secrets.SVAGA_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SVAGA_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.SVAGA_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::warning::Secrets SVAGA_* are not set: the APK is signed with a temporary key and will not install over other builds."
+            exit 0
+          fi
+          DIR="$RUNNER_TEMP/svaga-keys"
+          mkdir -p "$DIR"
+          echo "$KEYSTORE_B64" | base64 -d > "$DIR/svaga.jks"
+          printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$DIR/svaga.jks" "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > "$DIR/keystore.properties"
+          echo "SVAGA_KEYS=$DIR" >> "$GITHUB_ENV"
+          keytool -list -v -keystore "$DIR/svaga.jks" -alias "$KEY_ALIAS" -storepass "$STORE_PASSWORD" | grep -E "SHA1|SHA256"
       - run: gradle assembleDebug --no-daemon --console=plain
       - uses: actions/upload-artifact@v4
         with:

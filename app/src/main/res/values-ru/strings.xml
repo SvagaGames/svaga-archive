@@ -427,4 +427,6 @@
     <string name="weekday_wed">ср</string>
     <string name="you_played">Вы играли %1$s ч в Svaga Emulator</string>
     <string name="your_rating">Ваша оценка</string>
+    <string name="translating">Переводим…</string>
+    <string name="err_translation">Перевод сейчас недоступен. Попробуйте позже.</string>
 </resources>

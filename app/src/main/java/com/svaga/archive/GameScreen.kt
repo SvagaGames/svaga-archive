@@ -319,15 +319,21 @@ private fun AboutBlock(vm: AppViewModel, game: Game) {
                     weight = FontWeight.SemiBold,
                 )
             } else if (Lang.code != "en" && !game.custom) {
-                Body(
-                    stringResource(R.string.translate),
-                    Modifier.clickable { vm.ensureTranslation(game.id) }.padding(vertical = 6.dp),
-                    color = Cyan,
-                    size = 14.sp,
-                    weight = FontWeight.SemiBold,
-                )
+                val key = "${game.id}:${Lang.code}"
+                if (vm.translating[key] == true) {
+                    Body(stringResource(R.string.translating), Modifier.padding(vertical = 6.dp), color = Muted, size = 14.sp)
+                } else {
+                    Body(
+                        stringResource(R.string.translate),
+                        Modifier.clickable { vm.ensureTranslation(game.id) }.padding(vertical = 6.dp),
+                        color = Cyan,
+                        size = 14.sp,
+                        weight = FontWeight.SemiBold,
+                    )
+                }
             }
         }
+        vm.translationErrors["${game.id}:${Lang.code}"]?.let { if (tr == null) Caption(stringResource(it), color = Red) }
     }
 }
 

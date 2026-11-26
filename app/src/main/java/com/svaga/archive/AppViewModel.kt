@@ -108,6 +108,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         private set
     val gamesCache = mutableStateMapOf<Int, Game>()
     val translations = mutableStateMapOf<String, String>()
+    /** Keys "id:lang" being translated right now, and the error shown under the description when it failed. */
+    val translating = mutableStateMapOf<String, Boolean>()
+    val translationErrors = mutableStateMapOf<String, Int>()
     val related = mutableStateMapOf<Int, Related>()
     val ruList = mutableStateMapOf<Int, List<RuTranslation>>()
 
@@ -815,14 +818,20 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     fun ensureTranslation(id: Int) {
         val lang = Lang.code
         val key = "$id:$lang"
-        if (lang == "en" || translations.containsKey(key)) return
+        if (lang == "en" || translations.containsKey(key) || translating[key] == true) return
+        translationErrors.remove(key)
+        translating[key] = true
         viewModelScope.launch {
             try {
-                api.translation(id, lang)?.let { translations[key] = it }
+                val text = api.translation(id, lang)
+                if (text != null) translations[key] = text else translationErrors[key] = R.string.err_translation
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                handle(e) // not configured or failed: the original text stays visible
+                translationErrors[key] = if (e is IOException) R.string.err_network else R.string.err_translation
+                handle(e)
+            } finally {
+                translating.remove(key)
             }
         }
     }
