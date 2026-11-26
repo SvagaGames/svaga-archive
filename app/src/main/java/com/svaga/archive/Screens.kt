@@ -420,26 +420,35 @@ var showForgotDialog by remember { mutableStateOf(false) }
                     mode = 0
                 }.padding(8.dp),
             )
-        } else {
-            PixelButton(
-                text = stringResource(if (mode == 1) R.string.register else R.string.login),
-                onClick = {
-                    if (mode == 1) vm.register(email.trim(), password, name.trim())
-                    else vm.login(email.trim(), password)
-                },ResetPasswordSection(vm, email)
-                filled = true,
-                enabled = !vm.authBusy && email.isNotBlank() && password.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                stringResource(if (mode == 1) R.string.to_login else R.string.to_register),
-                color = Cyan,
-                fontFamily = Vt,
-                fontSize = 19.sp,
-                modifier = Modifier.clickable { mode = if (mode == 1) 0 else 1 }.padding(8.dp),
-            )
-            SocialLoginButtons(vm)
+      } else {
+    // Кнопка Войти / Зарегистрироваться
+    PixelButton(
+        text = stringResource(if (mode == 1) R.string.register else R.string.login),
+        onClick = { 
+            if (mode == 1) vm.register(email.trim(), password, name.trim()) 
+            else vm.login(email.trim(), password) 
+        },
+        filled = true,
+        enabled = !vm.authBusy && email.isNotBlank() && password.isNotEmpty(),
+        modifier = Modifier.fillMaxWidth(),
+    )
+
+    // Вызов нового блока восстановления пароля (идет отдельно, после кнопки)
+    ResetPasswordSection(vm, email)
+
+    Spacer(Modifier.height(16.dp))
+    
+    Text(
+        stringResource(if (mode == 1) R.string.to_login else R.string.to_register),
+        color = Cyan, 
+        fontFamily = Vt, 
+        fontSize = 19.sp, 
+        modifier = Modifier.clickable {
+            mode = if (mode == 1) 0 else 1 
+        }.padding(8.dp),
+    )
+    SocialLoginButtons(vm)
+}
         }        // 
         TextButton(
             onClick = { showForgotDialog = true },
