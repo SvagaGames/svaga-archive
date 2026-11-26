@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '17' }
       - uses: gradle/actions/setup-gradle@v4
-        with: { gradle-version: '8.9' }
+        with: { gradle-version: '8.14.3' }
       # The permanent Svaga key (same as on the server) comes from repository secrets,
       # so GitHub builds install over server builds and over each other.
       - name: Signing key
@@ -30,20 +30,31 @@ jobs:
           printf 'storeFile=%s\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$DIR/svaga.jks" "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > "$DIR/keystore.properties"
           echo "SVAGA_KEYS=$DIR" >> "$GITHUB_ENV"
           keytool -list -v -keystore "$DIR/svaga.jks" -alias "$KEY_ALIAS" -storepass "$STORE_PASSWORD" | grep -E "SHA1|SHA256"
-      - run: gradle assembleDebug --no-daemon --console=plain
+      # GitHub / RuStore / GetApps get APKs, Google Play gets an App Bundle. All are release builds (R8), one key.
+      - run: gradle assembleGithubRelease assembleRustoreRelease assembleGetappsRelease bundlePlayRelease --no-daemon --console=plain
+      - name: Collect files
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/github/release/*.apk out/SvagaArchive.apk
+          cp app/build/outputs/apk/rustore/release/*.apk out/SvagaArchive-rustore.apk
+          cp app/build/outputs/apk/getapps/release/*.apk out/SvagaArchive-getapps.apk
+          cp app/build/outputs/bundle/playRelease/*.aab out/SvagaArchive-play.aab
+          ls -la out
       - uses: actions/upload-artifact@v4
         with:
-          name: svaga-archive-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: svaga-archive
+          path: out/*
       # Every build of main is published as the release "latest", so the APK has a permanent download link:
       # https://github.com/SvagaGames/svaga-archive/releases/latest/download/SvagaArchive.apk
+      # The store files are attached to the same release, ready to upload to Google Play, RuStore and GetApps.
       - name: Publish release
         if: github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/debug/*.apk SvagaArchive.apk
           VERSION=$(grep -o 'versionName = "[^"]*"' app/build.gradle.kts | cut -d'"' -f2)
           TAG="v$VERSION"
+          NOTES="Сборка ${GITHUB_SHA::7}"
+          [ -f CHANGELOG.md ] && NOTES="$(awk '/^## /{n++} n==1' CHANGELOG.md)"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" SvagaArchive.apk --title "Svaga Archive $VERSION" --notes "Сборка ${GITHUB_SHA::7}" --latest
+          gh release create "$TAG" out/* --title "Svaga Archive $VERSION" --notes "$NOTES" --latest

@@ -1,4 +1,5 @@
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("com.android.application")
@@ -23,14 +24,24 @@ val hasKey = keyFile != null
 
 android {
     namespace = "com.svaga.archive"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.svaga.archive"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 21
-        versionName = "1.1.0"
+        targetSdk = 36
+        versionCode = 22
+        versionName = "1.2.0"
+    }
+
+    // One code base, four shops. Google Play does not allow an app to update itself, so the APK self-update lives only
+    // in the GitHub build; Play and RuStore builds update through their own stores.
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") { dimension = "store"; buildConfigField("String", "STORE", "\"github\"") }
+        create("play") { dimension = "store"; buildConfigField("String", "STORE", "\"play\"") }
+        create("rustore") { dimension = "store"; buildConfigField("String", "STORE", "\"rustore\"") }
+        create("getapps") { dimension = "store"; buildConfigField("String", "STORE", "\"getapps\"") }
     }
 
     if (hasKey) {
@@ -49,7 +60,9 @@ android {
             if (hasKey) signingConfig = signingConfigs.getByName("svaga")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (hasKey) signingConfig = signingConfigs.getByName("svaga")
         }
     }
@@ -57,17 +70,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+}
+
+kotlin {
+    compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 }
 
 dependencies {
@@ -82,4 +97,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
+    "rustoreImplementation"("ru.rustore.sdk:appupdate:10.5.2")
 }
