@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Svaga ID · VK</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0A0C11;color:#F3F5F9;font:16px system-ui,sans-serif}a{color:#3EE0FF}</style>
+</head>
+<body>
+<p>Возвращаемся в Svaga Archive… <a id="go" href="#">продолжить</a></p>
+<script>
+  // VK ID returns code, state and device_id here; pass them unchanged to the Svaga server.
+  var target = "https://45-151-106-142.sslip.io:8443/v1/auth/oauth/vk/callback" + location.search;
+  document.getElementById("go").href = target;
+  location.replace(target);
+</script>
+</body>
+</html>
