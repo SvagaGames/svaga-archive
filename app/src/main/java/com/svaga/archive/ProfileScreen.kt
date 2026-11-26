@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -167,7 +169,9 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
         vm.loadMyComments()
         vm.loadActivity()
         vm.loadPlaytime()
+        vm.extras.loadRa()
     }
+    var share by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> if (uri != null) vm.uploadAvatar(uri) }
     val name = vm.displayName.ifBlank { vm.email }
     val ach = vm.ach
@@ -181,6 +185,8 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
             if (standalone) IconBtn(Icons.AutoMirrored.Filled.ArrowBack, nav::back)
             else IconBtn(Icons.Filled.Notifications, { nav.go(Routes.NOTIFICATIONS) }, badge = vm.unread)
             Spacer(Modifier.weight(1f))
+            IconBtn(Icons.Filled.Share, { share = true })
+            Spacer(Modifier.width(8.dp))
             IconBtn(Icons.Filled.Settings, { nav.go(Routes.SETTINGS) })
         }
         ProfileHeader(vm.userId, vm.avatarVersion, name, vm.createdAt, ach?.level ?: vm.level, vm.role == "creator") { picker.launch("image/*") }
@@ -234,8 +240,16 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
             EventsList(recent, vm, nav)
         }
 
+        val raState = vm.extras.ra
+        if (raState?.linked == true) {
+            Spacer(Modifier.height(12.dp))
+            RaProfileCard(raState, onClick = { nav.go(Routes.RA) })
+        }
+
         Spacer(Modifier.height(12.dp))
         SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
+            SettingRow(Icons.Filled.Home, stringResource(R.string.collection_mine), onClick = { nav.go(Routes.COLLECTION) })
+            Divider1()
             SettingRow(Icons.Filled.Favorite, stringResource(R.string.people_friends), value = vm.friends.friends.size.toString(), onClick = { nav.go(Routes.PEOPLE) })
             Divider1()
             SettingRow(Icons.Filled.Edit, stringResource(R.string.my_comments_title), value = vm.myComments.size.toString(), onClick = { nav.go(Routes.MY_COMMENTS) })
@@ -244,6 +258,7 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
         }
         Spacer(Modifier.height(if (standalone) 24.dp else BottomBarSpace))
     }
+    if (share) ShareDialog(stringResource(R.string.share_profile_text) + " " + DOWNLOAD_PAGE, { share = false }) { ProfileShareCard(vm) }
 }
 
 @Composable

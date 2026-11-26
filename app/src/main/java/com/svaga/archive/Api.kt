@@ -230,6 +230,52 @@ data class PlaytimeItem(val gameId: Int, val seconds: Long, val sessions: Int, v
 
 data class PlaytimeResult(val totalSeconds: Long, val items: List<PlaytimeItem>)
 
+data class CollectionCopy(
+    val id: Long,
+    val gameId: Int,
+    val platform: String?,
+    val region: String?,
+    val hasCart: Boolean,
+    val hasBox: Boolean,
+    val hasManual: Boolean,
+    val sealed: Boolean,
+    val condition: String?,
+    val price: Double?,
+    val currency: String?,
+    val acquiredOn: String?,
+    val note: String?,
+) {
+    val complete: Boolean get() = hasCart && hasBox && hasManual
+}
+
+data class MoneyTotal(val currency: String, val sum: Double, val count: Int)
+
+data class CollectionResult(val items: List<CollectionCopy>, val copies: Int, val games: Int, val complete: Int, val totals: List<MoneyTotal>)
+
+data class SteamStatus(val configured: Boolean, val steamId: String?, val importedAt: String?)
+
+data class SteamImportResult(val owned: Int, val matched: Int, val added: Int, val already: Int, val hours: Int, val unmatched: List<String>)
+
+data class RaGame(
+    val raId: Int, val title: String, val console: String, val icon: String?,
+    val total: Int, val earned: Int, val earnedHardcore: Int, val award: String?,
+) {
+    val beaten: Boolean get() = award != null
+    val mastered: Boolean get() = award == "mastered" || award == "completed"
+}
+
+data class RaAch(val id: Int, val title: String, val description: String, val points: Int, val hardcore: Boolean, val badge: String?, val game: String, val console: String, val at: String)
+
+data class RaSummary(
+    val user: String, val avatar: String?, val memberSince: String?, val points: Int, val softPoints: Int, val truePoints: Int,
+    val presence: String?, val gamesCount: Int, val beaten: Int, val mastered: Int, val games: List<RaGame>, val recent: List<RaAch>,
+    val stale: Boolean,
+)
+
+data class RaState(val configured: Boolean, val linked: Boolean, val summary: RaSummary?)
+
+data class RaImportResult(val added: Int, val updated: Int, val unmatched: List<String>)
+
 fun avatarUrl(userId: String, version: Int) = "$BASE_URL/v1/users/$userId/avatar?v=$version"
 
 fun formatDate(iso: String?): String {
@@ -427,7 +473,7 @@ class ApiClient(private val store: TokenStore) {
         if (auth) store.access?.let { builder.header("Authorization", "Bearer $it") }
         when (method) {
             "GET" -> builder.get()
-            "DELETE" -> builder.delete()
+            "DELETE" -> if (body != null) builder.delete(body.toString().toRequestBody(jsonType)) else builder.delete()
             else -> builder.method(
                 method,
                 raw?.toRequestBody("image/jpeg".toMediaType())
@@ -958,6 +1004,116 @@ class ApiClient(private val store: TokenStore) {
                 PlaytimeItem(it.optInt("gameId"), it.optLong("seconds"), it.optInt("sessions"), it.optString("lastPlayed"))
             },
         )
+    }
+
+    // ---- account ----
+    suspend fun deleteAccount() = io {
+        call("DELETE", "/v1/me", JSONObject().put("confirm", "DELETE"))
+        Unit
+    }
+
+    // ---- collection ----
+    private fun parseCopy(o: JSONObject) = CollectionCopy(
+        id = o.optLong("id"), gameId = o.optInt("gameId"), platform = o.str("platform"), region = o.str("region"),
+        hasCart = o.optBoolean("hasCart", true), hasBox = o.optBoolean("hasBox"), hasManual = o.optBoolean("hasManual"),
+        sealed = o.optBoolean("sealed"), condition = o.str("condition"),
+        price = if (o.isNull("price")) null else o.optDouble("price"), currency = o.str("currency"),
+        acquiredOn = o.str("acquiredOn"), note = o.str("note"),
+    )
+
+    fun copyToJson(c: CollectionCopy): JSONObject = JSONObject()
+        .put("gameId", c.gameId)
+        .put("platform", c.platform ?: JSONObject.NULL)
+        .put("region", c.region ?: JSONObject.NULL)
+        .put("hasCart", c.hasCart).put("hasBox", c.hasBox).put("hasManual", c.hasManual).put("sealed", c.sealed)
+        .put("condition", c.condition ?: JSONObject.NULL)
+        .put("price", c.price ?: JSONObject.NULL)
+        .put("currency", c.currency ?: JSONObject.NULL)
+        .put("acquiredOn", c.acquiredOn ?: JSONObject.NULL)
+        .put("note", c.note ?: JSONObject.NULL)
+
+    suspend fun collection(): CollectionResult = io {
+        val o = call("GET", "/v1/me/collection")
+        CollectionResult(
+            items = (o.optJSONArray("items") ?: JSONArray()).objects().map { parseCopy(it) },
+            copies = o.optInt("copies"), games = o.optInt("games"), complete = o.optInt("complete"),
+            totals = (o.optJSONArray("totals") ?: JSONArray()).objects().map {
+                MoneyTotal(it.optString("currency"), it.optDouble("sum", 0.0), it.optInt("count"))
+            },
+        )
+    }
+
+    suspend fun gameCopies(gameId: Int): List<CollectionCopy> = io {
+        (call("GET", "/v1/games/$gameId/collection").optJSONArray("items") ?: JSONArray()).objects().map { parseCopy(it) }
+    }
+
+    suspend fun saveCopy(c: CollectionCopy): CollectionCopy = io {
+        parseCopy(if (c.id > 0) call("PUT", "/v1/me/collection/${c.id}", copyToJson(c)) else call("POST", "/v1/me/collection", copyToJson(c)))
+    }
+
+    suspend fun deleteCopy(id: Long) = io {
+        call("DELETE", "/v1/me/collection/$id")
+        Unit
+    }
+
+    // ---- Steam ----
+    suspend fun steamStatus(): SteamStatus = io {
+        val o = call("GET", "/v1/import/steam")
+        SteamStatus(o.optBoolean("configured"), o.str("steamId"), o.str("importedAt"))
+    }
+
+    suspend fun importSteam(profile: String, playtime: Boolean): SteamImportResult = io {
+        val o = call("POST", "/v1/import/steam", JSONObject().put("profile", profile).put("playtime", playtime))
+        SteamImportResult(
+            o.optInt("owned"), o.optInt("matched"), o.optInt("added"), o.optInt("already"), o.optInt("hours"),
+            (o.optJSONArray("unmatched") ?: JSONArray()).strings(),
+        )
+    }
+
+    // ---- RetroAchievements ----
+    private fun parseRa(o: JSONObject): RaState {
+        val s = o.optJSONObject("summary")
+        return RaState(
+            configured = o.optBoolean("configured"),
+            linked = o.optBoolean("linked"),
+            summary = s?.let { x ->
+                RaSummary(
+                    user = x.optString("user"), avatar = x.str("avatar"), memberSince = x.str("memberSince"),
+                    points = x.optInt("points"), softPoints = x.optInt("softPoints"), truePoints = x.optInt("truePoints"),
+                    presence = x.str("presence"), gamesCount = x.optInt("gamesCount"), beaten = x.optInt("beaten"),
+                    mastered = x.optInt("mastered"),
+                    games = (x.optJSONArray("games") ?: JSONArray()).objects().map {
+                        RaGame(
+                            it.optInt("raId"), it.optString("title"), it.optString("console"), it.str("icon"),
+                            it.optInt("total"), it.optInt("earned"), it.optInt("earnedHardcore"), it.str("award"),
+                        )
+                    },
+                    recent = (x.optJSONArray("recent") ?: JSONArray()).objects().map {
+                        RaAch(
+                            it.optInt("id"), it.optString("title"), it.optString("description"), it.optInt("points"),
+                            it.optBoolean("hardcore"), it.str("badge"), it.optString("game"), it.optString("console"), it.optString("at"),
+                        )
+                    },
+                    stale = x.optBoolean("stale"),
+                )
+            },
+        )
+    }
+
+    suspend fun ra(refresh: Boolean = false): RaState = io { parseRa(call("GET", "/v1/me/ra" + if (refresh) "?refresh=true" else "")) }
+
+    suspend fun userRa(id: String): RaState = io { parseRa(call("GET", "/v1/users/$id/ra")) }
+
+    suspend fun linkRa(username: String): RaState = io { parseRa(call("PUT", "/v1/me/ra", JSONObject().put("username", username))) }
+
+    suspend fun unlinkRa() = io {
+        call("DELETE", "/v1/me/ra")
+        Unit
+    }
+
+    suspend fun importRa(): RaImportResult = io {
+        val o = call("POST", "/v1/me/ra/import")
+        RaImportResult(o.optInt("added"), o.optInt("updated"), (o.optJSONArray("unmatched") ?: JSONArray()).strings())
     }
 }
 

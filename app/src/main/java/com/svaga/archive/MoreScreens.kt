@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -72,6 +74,7 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
     var langDialog by remember { mutableStateOf(false) }
     var nameDialog by remember { mutableStateOf(false) }
     var logoutDialog by remember { mutableStateOf(false) }
+    var deleteDialog by remember { mutableStateOf(false) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri -> if (uri != null) vm.uploadAvatar(uri) }
     ScreenScaffold(stringResource(R.string.settings_title), nav, subtitle = stringResource(R.string.settings_subtitle)) {
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
@@ -129,6 +132,14 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
                 Divider1()
                 SettingRow(Icons.Filled.Create, stringResource(R.string.add_game_title), onClick = { nav.go(Routes.ADD_GAME) })
             }
+            Label(stringResource(R.string.integrations))
+            SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
+                SettingRow(Icons.Filled.Home, stringResource(R.string.collection_mine), subtitle = stringResource(R.string.collection_subtitle), onClick = { nav.go(Routes.COLLECTION) })
+                Divider1()
+                SettingRow(Icons.Filled.ShoppingCart, stringResource(R.string.steam_title), subtitle = stringResource(R.string.steam_subtitle), onClick = { nav.go(Routes.STEAM) })
+                Divider1()
+                SettingRow(Icons.Filled.Star, "RetroAchievements", subtitle = stringResource(R.string.ra_subtitle), onClick = { nav.go(Routes.RA) })
+            }
             if (vm.role == "creator") {
                 Label(stringResource(R.string.creator_badge))
                 SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
@@ -147,8 +158,22 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
                 Caption(stringResource(R.string.data_credit))
                 Caption(stringResource(R.string.version))
             }
+            Spacer(Modifier.height(10.dp))
+            SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
+                UpdatesRow()
+                Divider1()
+                SettingRow(Icons.Filled.Info, stringResource(R.string.privacy_policy), onClick = { openInBrowser(ctx, PRIVACY_PAGE) })
+            }
             Spacer(Modifier.height(16.dp))
             SvButton(stringResource(R.string.logout), { logoutDialog = true }, Modifier.fillMaxWidth().padding(horizontal = 16.dp), kind = BtnKind.Danger, icon = Icons.AutoMirrored.Filled.ExitToApp)
+            Spacer(Modifier.height(10.dp))
+            Text(
+                stringResource(R.string.delete_account),
+                color = Red.copy(alpha = 0.8f),
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().clickable { deleteDialog = true }.padding(12.dp),
+            )
             Spacer(Modifier.height(32.dp))
         }
     }
@@ -186,6 +211,7 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
             }
         }
     }
+    if (deleteDialog) DeleteAccountDialog(vm) { deleteDialog = false }
     if (logoutDialog) {
         ConfirmDialog(stringResource(R.string.logout), vm.email, { logoutDialog = false; vm.logout() }, { logoutDialog = false }, confirmText = stringResource(R.string.logout))
     }

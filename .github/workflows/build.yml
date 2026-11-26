@@ -32,6 +32,12 @@ jobs:
           keytool -list -v -keystore "$DIR/svaga.jks" -alias "$KEY_ALIAS" -storepass "$STORE_PASSWORD" | grep -E "SHA1|SHA256"
       # GitHub / RuStore / GetApps get APKs, Google Play gets an App Bundle. All are release builds (R8), one key.
       - run: gradle assembleGithubRelease assembleRustoreRelease assembleGetappsRelease bundlePlayRelease --no-daemon --console=plain
+      - name: List RuStore SDK classes (diagnostics on failure)
+        if: failure()
+        run: |
+          for f in $(find ~/.gradle -name 'appupdate-*.aar' 2>/dev/null | head -2); do
+            mkdir -p /tmp/rs && cd /tmp/rs && unzip -o -q "$f" classes.jar && unzip -l classes.jar | grep -o 'ru/rustore/sdk/appupdate/[^ ]*\.class' | grep -v '\$' | head -80
+          done
       - name: Collect files
         run: |
           mkdir -p out

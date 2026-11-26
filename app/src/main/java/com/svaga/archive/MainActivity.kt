@@ -21,6 +21,12 @@ class MainActivity : ComponentActivity() {
         vm.resume()
     }
 
+    override fun onDestroy() {
+        UpdateState.updater?.close()
+        UpdateState.updater = null
+        super.onDestroy()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Lang.load(applicationContext)
@@ -30,6 +36,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         CrashLog.install(applicationContext)
         if (savedInstanceState == null) vm.handleDeepLink(intent?.data)
+        val updater = createUpdater(this)
+        UpdateState.updater = updater
+        if (updater.canCheck) updater.check(manual = false)
         setContent {
             Localized {
                 SvagaTheme {

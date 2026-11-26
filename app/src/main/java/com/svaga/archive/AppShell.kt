@@ -154,6 +154,9 @@ object Routes {
     const val PEOPLE = "people"
     const val NEWS_NEW = "news_new"
     const val MY_COMMENTS = "my_comments"
+    const val COLLECTION = "collection"
+    const val STEAM = "steam"
+    const val RA = "retroachievements"
     fun game(id: Int) = "game/$id"
     fun user(id: String) = "user/$id"
 }
@@ -190,6 +193,9 @@ fun MainNav(vm: AppViewModel) {
         composable(Routes.PEOPLE) { PeopleScreen(vm, nav) }
         composable(Routes.NEWS_NEW) { NewsEditorScreen(vm, nav) }
         composable(Routes.MY_COMMENTS) { MyCommentsScreen(vm, nav) }
+        composable(Routes.COLLECTION) { CollectionScreen(vm, nav) }
+        composable(Routes.STEAM) { SteamImportScreen(vm, nav) }
+        composable(Routes.RA) { RaScreen(vm, nav) }
     }
 }
 
@@ -209,6 +215,7 @@ fun MainScreen(vm: AppViewModel, nav: Nav) {
                     modifier = Modifier.fillMaxWidth().background(Amber).padding(vertical = 4.dp, horizontal = 12.dp),
                 )
             }
+            UpdateBanner()
             Box(Modifier.weight(1f).fillMaxWidth()) {
                 when (tab) {
                     0 -> HomeScreen(vm, nav, openLibrary = { s -> libraryStatus = s; tab = 1 }, openCalendar = { tab = 2 })

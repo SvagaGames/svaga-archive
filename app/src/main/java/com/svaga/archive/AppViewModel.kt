@@ -31,7 +31,8 @@ data class UiToast(val kind: String, val code: String, val tier: Int, val sp: In
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val store = TokenStore(app)
-    private val api = ApiClient(store)
+    internal val api = ApiClient(store)
+    val extras by lazy { Extras(this) }
     private val settings = app.getSharedPreferences("svaga_settings", Context.MODE_PRIVATE)
     private val offlineStore = OfflineStore(app)
     private val flushMutex = Mutex()
@@ -579,9 +580,12 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         friendFeedLoaded = false
         news = emptyList()
         newsLoaded = false
+        extras.reset()
     }
 
-    private fun handle(e: Exception) {
+    internal fun forgetLocal() = clearLocal()
+
+    internal fun handle(e: Exception) {
         if (e is IOException) offline = true
         if (e is ApiException) {
             if (e.http == 401) {
@@ -594,7 +598,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun errorRes(e: Exception): Int = when (e) {
+    internal fun errorRes(e: Exception): Int = when (e) {
         is ApiException -> when (e.code) {
             "invalid_credentials" -> R.string.err_invalid_credentials
             "email_taken" -> R.string.err_email_taken
@@ -616,6 +620,16 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             "forbidden" -> R.string.err_forbidden
             "last_method" -> R.string.err_last_method
             "provider_disabled" -> R.string.err_oauth_provider
+            "steam_not_configured" -> R.string.err_steam_off
+            "steam_profile_not_found", "invalid_profile" -> R.string.err_steam_profile
+            "steam_profile_private" -> R.string.err_steam_private
+            "steam_key_invalid", "steam_unavailable" -> R.string.err_steam_down
+            "ra_not_configured" -> R.string.err_ra_off
+            "ra_user_not_found", "invalid_username" -> R.string.err_ra_user
+            "ra_key_invalid", "ra_unavailable" -> R.string.err_ra_down
+            "creator_cannot_delete" -> R.string.err_creator_delete
+            "invalid_price" -> R.string.err_price
+            "too_many" -> R.string.err_too_many
             else -> when {
                 e.http == 429 -> R.string.err_too_many
                 e.http >= 500 -> R.string.err_server
@@ -1488,6 +1502,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                     api.gamesByIds(chunk).forEach { gamesCache[it.id] = it }
                 }
                 saveGamesCache()
+                extras.refreshWidget()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -1550,6 +1565,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         offlineStore.saveLibrary(library.values)
         pendingCount = offlineStore.enqueue(gameId, fields, System.currentTimeMillis()).size
         viewModelScope.launch { flushPending() }
+        if (fields.has("status")) extras.refreshWidget()
     }
 
     fun setStatus(gameId: Int, status: String?) = update(gameId) { put("status", status ?: JSONObject.NULL) }
