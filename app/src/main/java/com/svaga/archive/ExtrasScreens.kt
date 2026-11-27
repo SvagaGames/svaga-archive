@@ -739,3 +739,66 @@ fun EmulatorAdminCard(vm: AppViewModel, gameId: Int) {
         }
     }
 }
+
+// =====================================================================
+// Hours played, entered by hand (consoles, PC, other emulators)
+// =====================================================================
+
+@Composable
+fun PlaytimeRow(vm: AppViewModel, gameId: Int) {
+    val secs = vm.playtimeByGame[gameId] ?: 0L
+    var open by remember { mutableStateOf(false) }
+    val shape = RoundedCornerShape(16.dp)
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp).clip(shape).background(Panel, shape).border(1.dp, Stroke, shape)
+            .clickable { open = true }.padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text("⏱", fontSize = 20.sp)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Body(stringResource(R.string.hours_title), weight = FontWeight.SemiBold, size = 15.sp)
+            Caption(if (secs > 0) hoursText(secs) else stringResource(R.string.hours_none))
+        }
+        Text(stringResource(if (secs > 0) R.string.hours_edit else R.string.hours_add), color = Cyan, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+    }
+    if (open) {
+        var h by remember { mutableStateOf(if (secs > 0) (secs / 3600).toString() else "") }
+        var m by remember { mutableStateOf(if (secs > 0) ((secs % 3600) / 60).toString() else "") }
+        Dialog(onDismissRequest = { open = false }) {
+            Column(Modifier.fillMaxWidth().clip(CardShape).background(Panel).padding(20.dp)) {
+                H2(stringResource(R.string.hours_title))
+                Spacer(Modifier.height(6.dp))
+                Caption(stringResource(R.string.hours_hint), maxLines = 4)
+                Spacer(Modifier.height(14.dp))
+                Row {
+                    SvField(h, { h = it.filter(Char::isDigit).take(5) }, stringResource(R.string.hours_h), Modifier.weight(1f), keyboard = KeyboardType.Number)
+                    Spacer(Modifier.width(10.dp))
+                    SvField(m, { v -> m = v.filter(Char::isDigit).take(2).let { if ((it.toIntOrNull() ?: 0) > 59) "59" else it } }, stringResource(R.string.hours_m), Modifier.weight(1f), keyboard = KeyboardType.Number)
+                }
+                Spacer(Modifier.height(10.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(1, 5, 10, 25).forEach { add ->
+                        SvChip("+$add", false, { h = ((h.toIntOrNull() ?: 0) + add).toString() })
+                    }
+                }
+                vm.extras.hoursError?.let { Spacer(Modifier.height(8.dp)); Body(stringResource(it), color = Red, size = 14.sp) }
+                Spacer(Modifier.height(16.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (secs > 0) SvButton(stringResource(R.string.hours_reset), { vm.extras.setHours(gameId, 0.0) { open = false } }, Modifier.weight(1f), kind = BtnKind.Danger)
+                    SvButton(stringResource(R.string.save), {
+                        val total = (h.toIntOrNull() ?: 0) + (m.toIntOrNull() ?: 0) / 60.0
+                        vm.extras.setHours(gameId, total) { open = false }
+                    }, Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun hoursText(secs: Long): String {
+    val h = secs / 3600
+    val m = (secs % 3600) / 60
+    return if (h > 0) stringResource(R.string.hours_hm, h, m) else stringResource(R.string.hours_m_only, m)
+}

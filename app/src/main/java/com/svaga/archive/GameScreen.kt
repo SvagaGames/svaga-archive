@@ -150,10 +150,8 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                     Spacer(Modifier.height(10.dp))
                     EmulatorAdminCard(vm, id)
                 }
-                vm.playtimeByGame[id]?.let { s ->
-                    Spacer(Modifier.height(8.dp))
-                    Caption(stringResource(R.string.you_played, hours(s)), Modifier.padding(horizontal = 20.dp), color = Cyan)
-                }
+                Spacer(Modifier.height(10.dp))
+                PlaytimeRow(vm, id)
 
                 // ---------- my rating ----------
                 SectionHeader(stringResource(R.string.your_rating), Modifier.padding(top = 10.dp))

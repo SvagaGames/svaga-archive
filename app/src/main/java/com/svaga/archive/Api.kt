@@ -1034,6 +1034,11 @@ class ApiClient(private val store: TokenStore) {
         Unit
     }
 
+    /** Sets the total hours played for a game (anywhere, not only in Svaga Emulator). Returns seconds. */
+    suspend fun setPlaytimeTotal(gameId: Int, hours: Double): Long = io {
+        call("PUT", "/v1/me/playtime/$gameId/total", JSONObject().put("hours", hours)).optLong("seconds")
+    }
+
     suspend fun playtime(): PlaytimeResult = io {
         val o = call("GET", "/v1/me/playtime")
         PlaytimeResult(

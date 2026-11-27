@@ -146,6 +146,20 @@ class Extras(private val vm: AppViewModel) {
         challenges = api.adminChallenges()
     }
 
+    // ---------- hours played (entered by hand) ----------
+    var hoursError by mutableStateOf<Int?>(null)
+        private set
+
+    fun setHours(gameId: Int, hours: Double, onDone: () -> Unit) {
+        hoursError = null
+        run({ hoursError = it }) {
+            val secs = api.setPlaytimeTotal(gameId, hours)
+            if (secs > 0) vm.playtimeByGame[gameId] = secs else vm.playtimeByGame.remove(gameId)
+            vm.loadPlaytime()
+            onDone()
+        }
+    }
+
     // ---------- Steam ----------
     var steam by mutableStateOf<SteamStatus?>(null)
         private set

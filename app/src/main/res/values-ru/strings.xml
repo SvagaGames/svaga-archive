@@ -48,7 +48,7 @@
     <string name="profile_account">АККАУНТ</string>
     <string name="logout">ВЫЙТИ</string>
     <string name="data_credit">Данные об играх: IGDB.com</string>
-    <string name="version">Svaga Games, v1.4.0</string>
+    <string name="version">Svaga Games, v1.5.0</string>
 
     <string name="err_network">Нет связи с сервером</string>
     <string name="err_invalid_credentials">Неверная почта или пароль</string>
@@ -639,4 +639,25 @@
     <string name="push_achievement">Достижение: %1$s (+%2$d SP)</string>
     <string name="push_level">Новый уровень: %1$d</string>
     <string name="push_new_achievement">Новое достижение</string>
+    <string name="hours_title">Время в игре</string>
+    <string name="hours_none">Не указано — нажмите, чтобы добавить часы</string>
+    <string name="hours_edit">Изменить</string>
+    <string name="hours_add">Указать</string>
+    <string name="hours_hint">Сколько всего вы играли в эту игру где угодно: на приставке, ПК, в других эмуляторах. Время в Svaga Emulator прибавляется само.</string>
+    <string name="hours_h">Часы</string>
+    <string name="hours_m">Минуты</string>
+    <string name="hours_reset">Сбросить</string>
+    <string name="hours_hm">%1$d ч %2$d мин</string>
+    <string name="hours_m_only">%1$d мин</string>
+    <string name="err_hours">Проверьте часы.</string>
+    <string name="rank_1">Мастер джойстика</string>
+    <string name="rank_2">Хранитель картриджей</string>
+    <string name="rank_3">Повелитель пикселей</string>
+    <string name="rank_4">Легенда аркад</string>
+    <string name="rank_5">Архитектор миров</string>
+    <string name="rank_6">Хранитель времени</string>
+    <string name="rank_7">Бессмертный геймер</string>
+    <string name="rank_8">Титан ретро</string>
+    <string name="rank_9">Свага</string>
+    <string name="rank_beyond">Свага +%1$d</string>
 </resources>

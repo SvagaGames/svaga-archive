@@ -158,10 +158,19 @@ fun achDescription(code: String, tier: Int, goal: Int): String {
     else stringResource(res, goal)
 }
 
+/** Levels 11..100: nine ranks of ten steps each (I..X). */
+private val RANK_NAMES = listOf(
+    R.string.rank_1, R.string.rank_2, R.string.rank_3, R.string.rank_4, R.string.rank_5,
+    R.string.rank_6, R.string.rank_7, R.string.rank_8, R.string.rank_9,
+)
+private val ROMAN10 = listOf("I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X")
+
 @Composable
-fun levelName(level: Int): String =
-    if (level <= LEVEL_NAMES.size) stringResource(LEVEL_NAMES[(level - 1).coerceAtLeast(0)])
-    else stringResource(LEVEL_NAMES.last()) + " " + (level - LEVEL_NAMES.size + 1)
+fun levelName(level: Int): String = when {
+    level <= LEVEL_NAMES.size -> stringResource(LEVEL_NAMES[(level - 1).coerceAtLeast(0)])
+    level <= 100 -> stringResource(RANK_NAMES[(level - 11) / 10]) + " " + ROMAN10[(level - 11) % 10]
+    else -> stringResource(R.string.rank_beyond, level - 100)
+}
 
 @Composable
 fun tierName(tier: Int): String = stringResource(TIER_NAMES[(tier - 1).coerceIn(0, 4)])

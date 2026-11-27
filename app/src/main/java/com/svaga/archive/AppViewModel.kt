@@ -633,6 +633,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             "invalid_pattern" -> R.string.err_pattern
             "games_required" -> R.string.err_games_required
             "invalid_dates" -> R.string.err_dates
+            "invalid_hours" -> R.string.err_hours
             else -> when {
                 e.http == 429 -> R.string.err_too_many
                 e.http >= 500 -> R.string.err_server
