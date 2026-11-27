@@ -59,6 +59,7 @@ data class Profile(
     val sp: Int = 0,
     val level: Int = 1,
     val featured: List<String> = emptyList(),
+    val notifyComeback: Boolean = true,
 )
 
 data class AchTier(val tier: Int, val goal: Int, val sp: Int, val unlockedAt: String?)
@@ -193,7 +194,15 @@ data class PublicProfile(
     val levelFrom: Int = 0,
     val levelTo: Int = 100,
     val featured: List<FeaturedAch> = emptyList(),
+    val frame: String = "none",
+    val background: String = "none",
 )
+
+// ---- 1.1: retro bingo, profile frames and backgrounds ----
+data class BingoCell(val id: String, val title: String, val emoji: String, val goal: Int, val progress: Int, val done: Boolean)
+data class Bingo(val season: String, val endsAt: String, val cells: List<BingoCell>, val lines: List<Int>, val linesTotal: Int, val full: Boolean)
+data class CosItem(val code: String, val unlocked: Boolean, val kind: String?, val progress: Int, val goal: Int)
+data class Cosmetics(val frame: String, val background: String, val frames: List<CosItem>, val backgrounds: List<CosItem>)
 
 data class BrowseResult(val items: List<Game>, val rawCount: Int)
 
@@ -777,6 +786,7 @@ class ApiClient(private val store: TokenStore) {
             sp = o.optInt("sp", 0),
             level = o.optInt("level", 1),
             featured = o.optJSONArray("featured")?.strings() ?: emptyList(),
+            notifyComeback = o.optBoolean("notifyComeback", true),
         )
     }
 
@@ -1019,7 +1029,40 @@ class ApiClient(private val store: TokenStore) {
             levelFrom = o.optInt("levelFrom", 0),
             levelTo = o.optInt("levelTo", 100),
             featured = (o.optJSONArray("featured") ?: JSONArray()).objects().map { FeaturedAch(it.optString("code"), it.optInt("tier", 1)) },
+            frame = o.optString("frame", "none").ifBlank { "none" },
+            background = o.optString("background", "none").ifBlank { "none" },
         )
+    }
+
+    suspend fun bingo(): Bingo = io {
+        val o = call("GET", "/v1/bingo")
+        val ru = java.util.Locale.getDefault().language == "ru"
+        Bingo(
+            o.optString("season"), o.optString("endsAt"),
+            (o.optJSONArray("cells") ?: JSONArray()).objects().map {
+                BingoCell(it.optString("id"), it.optString(if (ru) "ru" else "en"), it.optString("emoji"), it.optInt("goal"), it.optInt("progress"), it.optBoolean("done"))
+            },
+            (o.optJSONArray("lines") ?: JSONArray()).ints(), o.optInt("linesTotal", 12), o.optBoolean("full"),
+        )
+    }
+
+    private fun parseCos(o: JSONObject): Cosmetics {
+        fun items(a: JSONArray?) = (a ?: JSONArray()).objects().map {
+            CosItem(it.optString("code"), it.optBoolean("unlocked"), it.str("kind"), it.optInt("progress"), it.optInt("goal"))
+        }
+        return Cosmetics(o.optString("frame", "none"), o.optString("background", "none"), items(o.optJSONArray("frames")), items(o.optJSONArray("backgrounds")))
+    }
+
+    suspend fun cosmetics(): Cosmetics = io { parseCos(call("GET", "/v1/me/cosmetics")) }
+    suspend fun setCosmetics(frame: String?, background: String?): Pair<String, String> = io {
+        val b = JSONObject()
+        frame?.let { b.put("frame", it) }
+        background?.let { b.put("background", it) }
+        val o = call("PUT", "/v1/me/cosmetics", b)
+        o.optString("frame", "none") to o.optString("background", "none")
+    }
+    suspend fun setNotifyComeback(value: Boolean): Boolean = io {
+        call("PATCH", "/v1/me", JSONObject().put("notifyComeback", value)).optBoolean("notifyComeback", value)
     }
 
     // ---- activity calendar, friends' feed, news, play time (server 0.8.0; older servers answer 404) ----

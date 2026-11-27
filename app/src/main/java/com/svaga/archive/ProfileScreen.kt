@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
@@ -52,11 +53,17 @@ private fun ProfileHeader(
     createdAt: String,
     level: Int,
     creator: Boolean,
+    frame: String = "none",
+    background: String = "none",
     onAvatar: (() -> Unit)? = null,
 ) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        Modifier.fillMaxWidth().padding(horizontal = 12.dp).clip(RoundedCornerShape(24.dp)).profileBackground(background)
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Box {
-            Avatar(userId, avatarVersion, name, 112.dp, Modifier.then(if (onAvatar != null) Modifier.clickable(onClick = onAvatar) else Modifier), ring = true)
+            FramedAvatar(userId, avatarVersion, name, 112.dp, frame, Modifier.then(if (onAvatar != null) Modifier.clickable(onClick = onAvatar) else Modifier))
             if (onAvatar != null) {
                 Box(
                     Modifier.align(Alignment.BottomEnd).size(34.dp).background(AccentBrush, CircleShape).border(3.dp, Bg, CircleShape).clickable(onClick = onAvatar),
@@ -186,11 +193,18 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
             if (standalone) IconBtn(Icons.AutoMirrored.Filled.ArrowBack, nav::back)
             else IconBtn(Icons.Filled.Notifications, { nav.go(Routes.NOTIFICATIONS) }, badge = vm.unread)
             Spacer(Modifier.weight(1f))
+            IconBtn(Icons.Filled.Face, { nav.go(Routes.COSMETICS) })
+            Spacer(Modifier.width(8.dp))
             IconBtn(Icons.Filled.Share, { share = true })
             Spacer(Modifier.width(8.dp))
             IconBtn(Icons.Filled.Settings, { nav.go(Routes.SETTINGS) })
         }
-        ProfileHeader(vm.userId, vm.avatarVersion, name, vm.createdAt, ach?.level ?: vm.level, vm.role == "creator") { picker.launch("image/*") }
+        LaunchedEffect(Unit) { vm.flair.loadCosmetics() }
+        val cos = vm.flair.cos
+        ProfileHeader(
+            vm.userId, vm.avatarVersion, name, vm.createdAt, ach?.level ?: vm.level, vm.role == "creator",
+            frame = cos?.frame ?: "none", background = cos?.background ?: "none",
+        ) { picker.launch("image/*") }
         vm.profileError?.let { Body(stringResource(it), Modifier.padding(horizontal = 20.dp), color = Red) }
         NumbersRow(
             listOf(
@@ -299,7 +313,7 @@ fun UserProfileScreen(vm: AppViewModel, id: String, nav: Nav) {
             return@Column
         }
         val p = prof.person
-        ProfileHeader(p.id, p.avatarVersion, p.name, p.createdAt, prof.level, p.creator)
+        ProfileHeader(p.id, p.avatarVersion, p.name, p.createdAt, prof.level, p.creator, frame = prof.frame, background = prof.background)
         val lib = prof.library
         NumbersRow(
             listOf(

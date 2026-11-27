@@ -264,6 +264,7 @@ fun HomePlayBlock(vm: AppViewModel, nav: Nav) {
             nav.go(Routes.WHEEL)
         }
     }
+    BingoTile(vm, nav, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp))
     val an = play.anniv
     if (an.isNotEmpty()) {
         SectionHeader(stringResource(R.string.anniv_title), Modifier.padding(top = 8.dp))

@@ -34,6 +34,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     internal val api = ApiClient(store)
     val extras by lazy { Extras(this) }
     val play by lazy { Play(this) }
+    val flair by lazy { Flair(this) }
     private val settings = app.getSharedPreferences("svaga_settings", Context.MODE_PRIVATE)
     private val offlineStore = OfflineStore(app)
     private val flushMutex = Mutex()
@@ -53,6 +54,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var role by mutableStateOf(store.role)
         private set
     var libraryPublic by mutableStateOf(true)
+    var notifyComeback by mutableStateOf(true)
         private set
     var sp by mutableStateOf(0)
         private set
@@ -1094,6 +1096,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 email = p.email
                 role = p.role
                 libraryPublic = p.libraryPublic
+                notifyComeback = p.notifyComeback
                 sp = p.sp
                 level = p.level
             } catch (e: CancellationException) {

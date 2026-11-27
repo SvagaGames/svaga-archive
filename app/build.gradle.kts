@@ -30,8 +30,8 @@ android {
         applicationId = "com.svaga.archive"
         minSdk = 26
         targetSdk = 36
-        versionCode = 29
-        versionName = "1.0"
+        versionCode = 30
+        versionName = "1.1"
     }
 
     // One code base, four shops. Google Play does not allow an app to update itself, so the APK self-update lives only

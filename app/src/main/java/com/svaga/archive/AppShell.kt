@@ -160,6 +160,8 @@ object Routes {
     const val LEADERBOARD = "leaderboard"
     const val CHALLENGES = "challenges"
     const val QUIZ = "quiz"
+    const val BINGO = "bingo"
+    const val COSMETICS = "cosmetics"
     const val WHEEL = "wheel"
     const val LISTS = "lists"
     fun list(id: Long) = "list/$id"
@@ -206,6 +208,8 @@ fun MainNav(vm: AppViewModel) {
         composable(Routes.LEADERBOARD) { LeaderboardScreen(vm, nav) }
         composable(Routes.CHALLENGES) { ChallengesAdminScreen(vm, nav) }
         composable(Routes.QUIZ) { QuizScreen(vm, nav) }
+        composable(Routes.BINGO) { BingoScreen(vm, nav) }
+        composable(Routes.COSMETICS) { CosmeticsScreen(vm, nav) }
         composable(Routes.WHEEL) { WheelScreen(vm, nav) }
         composable(Routes.LISTS) { ListsScreen(vm, nav) }
         composable("list/{id}", arguments = listOf(navArgument("id") { type = NavType.LongType })) { e ->

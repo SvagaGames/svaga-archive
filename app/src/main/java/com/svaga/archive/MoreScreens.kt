@@ -133,6 +133,13 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
                     },
                 )
                 Divider1()
+                SettingRow(
+                    Icons.Filled.Notifications, stringResource(R.string.comeback_title), subtitle = stringResource(R.string.comeback_hint),
+                    trailing = {
+                        Switch(vm.notifyComeback, { vm.flair.setComeback(it) }, colors = SwitchDefaults.colors(checkedTrackColor = Cyan, checkedThumbColor = Color.White))
+                    },
+                )
+                Divider1()
                 SettingRow(Icons.Filled.Star, stringResource(R.string.ach_title), onClick = { nav.go(Routes.ACHIEVEMENTS) })
                 Divider1()
                 SettingRow(Icons.Filled.ThumbUp, stringResource(R.string.stats_title), onClick = { nav.go(Routes.STATS) })
@@ -276,6 +283,9 @@ fun notificationText(n: NotificationItem): String {
         "news" -> stringResource(R.string.n_news, n.payload.optString("title"))
         "anniversary" -> stringResource(R.string.n_anniversary, name, androidx.compose.ui.platform.LocalContext.current.resources.getQuantityString(R.plurals.years_count, n.payload.optInt("years"), n.payload.optInt("years")))
         "list_like" -> stringResource(R.string.n_list_like, name, n.payload.optString("title"))
+        "comeback" -> stringResource(R.string.n_comeback, name, n.payload.optInt("days"))
+        "bingo_line" -> stringResource(R.string.n_bingo_line, n.payload.optInt("lines"), n.payload.optInt("total", 12))
+        "bingo_full" -> stringResource(R.string.n_bingo_full)
         else -> n.kind
     }
 }
@@ -294,7 +304,8 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
                 val (icon, color) = when (n.kind) {
                     "achievement", "level_up" -> Icons.Filled.Star to Amber
                     "comment_like", "list_like" -> Icons.Filled.Favorite to Pink
-                    "anniversary", "release" -> Icons.Filled.DateRange to Amber
+                    "anniversary", "release", "comeback" -> Icons.Filled.DateRange to Amber
+                    "bingo_line", "bingo_full" -> Icons.Filled.Star to Green
                     else -> Icons.Filled.Person to Cyan
                 }
                 Row(
@@ -312,7 +323,8 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
                                     val lid = n.payload.optLong("listId", 0L)
                                     if (lid > 0) nav.go(Routes.list(lid))
                                 }
-                                "comment_like", "release", "anniversary" -> {
+                                "bingo_line", "bingo_full" -> nav.go(Routes.BINGO)
+                                "comment_like", "release", "anniversary", "comeback" -> {
                                     val gid = n.payload.optInt("gameId", 0)
                                     if (gid > 0) nav.game(gid)
                                 }

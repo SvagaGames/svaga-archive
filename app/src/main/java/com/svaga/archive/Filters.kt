@@ -77,6 +77,7 @@ private val ACH_TITLE: Map<String, Int> = mapOf(
     "retrohunter" to R.string.ach2_retrohunter_t,
     "quizmaster" to R.string.ach2_quizmaster_t,
     "curator" to R.string.ach2_curator_t,
+    "bingo" to R.string.ach2_bingo_t,
     "full_house" to R.string.ach2_full_house_t,
     "perfectionist" to R.string.ach2_perfectionist_t,
     "ra_link" to R.string.ach2_ra_link_t,
@@ -120,6 +121,7 @@ private val ACH_DESC: Map<String, Int> = mapOf(
     "retrohunter" to R.string.ach2_retrohunter_d,
     "quizmaster" to R.string.ach2_quizmaster_d,
     "curator" to R.string.ach2_curator_d,
+    "bingo" to R.string.ach2_bingo_d,
     "full_house" to R.string.ach2_full_house_d,
     "perfectionist" to R.string.ach2_perfectionist_d,
     "ra_link" to R.string.ach2_ra_link_d,
@@ -140,7 +142,7 @@ private val LEVEL_NAMES = listOf(
 
 private val TIER_NAMES = listOf(R.string.tier_1, R.string.tier_2, R.string.tier_3, R.string.tier_4, R.string.tier_5)
 
-val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "quizmaster", "curator", "theme", "season", "secret")
+val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "quizmaster", "curator", "bingo", "theme", "season", "secret")
 
 @Composable
 fun achTitle(code: String): String = when (code) {

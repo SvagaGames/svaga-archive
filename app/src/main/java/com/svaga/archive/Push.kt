@@ -73,6 +73,9 @@ object Push {
             "news" -> ctx.getString(R.string.n_news, p.optString("title"))
             "anniversary" -> ctx.getString(R.string.n_anniversary, name, ctx.resources.getQuantityString(R.plurals.years_count, p.optInt("years"), p.optInt("years")))
             "list_like" -> ctx.getString(R.string.n_list_like, name, p.optString("title"))
+            "comeback" -> ctx.getString(R.string.n_comeback, name, p.optInt("days"))
+            "bingo_line" -> ctx.getString(R.string.n_bingo_line, p.optInt("lines"), p.optInt("total", 12))
+            "bingo_full" -> ctx.getString(R.string.n_bingo_full)
             else -> null
         }
     }
