@@ -54,8 +54,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     var role by mutableStateOf(store.role)
         private set
     var libraryPublic by mutableStateOf(true)
-    var notifyComeback by mutableStateOf(true)
         private set
+    var notifyComeback by mutableStateOf(true)
     var sp by mutableStateOf(0)
         private set
     var level by mutableStateOf(1)
