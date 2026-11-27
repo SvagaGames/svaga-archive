@@ -677,14 +677,14 @@ fun UpdatesRow() {
     val subtitle = when {
         UpdateState.checking -> stringResource(R.string.update_checking)
         UpdateState.ready -> stringResource(R.string.update_ready)
-        UpdateState.offer != null -> UpdateState.offer?.version?.let { stringResource(R.string.update_available_v, it) } ?: stringResource(R.string.update_available)
+        UpdateState.offer != null -> UpdateState.offer?.let { offerLabel(it) }?.let { stringResource(R.string.update_available_v, it) } ?: stringResource(R.string.update_available)
         UpdateState.upToDate == true -> stringResource(R.string.update_latest)
         UpdateState.failed -> stringResource(R.string.update_failed)
         else -> stringResource(R.string.update_store_hint)
     }
     SettingRow(
         Icons.Filled.Refresh,
-        stringResource(R.string.update_title) + " · v" + BuildConfig.VERSION_NAME,
+        stringResource(R.string.update_title) + " · " + stringResource(R.string.version_build, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
         subtitle = subtitle,
         onClick = when {
             u == null || !u.canCheck -> null

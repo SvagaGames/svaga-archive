@@ -22,7 +22,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /** A newer version the store (or GitHub) offers. */
-data class UpdateOffer(val version: String?, val notes: String?)
+data class UpdateOffer(val version: String?, val notes: String?, val build: Int? = null)
+
+/** "1.0 (сборка 33)" — every build is 1.0 until the store release, so the build number tells them apart. */
+@Composable
+fun offerLabel(o: UpdateOffer): String? = o.version?.let { v -> o.build?.let { stringResource(R.string.version_build, v, it) } ?: v }
 
 /** Shared between the store-specific updater (created by MainActivity) and the UI. */
 object UpdateState {
@@ -84,7 +88,7 @@ fun UpdateBanner(modifier: Modifier = Modifier) {
             val title = when {
                 UpdateState.ready -> stringResource(R.string.update_ready)
                 p != null -> stringResource(R.string.update_downloading, (p * 100).toInt())
-                offer?.version != null -> stringResource(R.string.update_available_v, offer.version)
+                offer?.version != null -> stringResource(R.string.update_available_v, offerLabel(offer)!!)
                 else -> stringResource(R.string.update_available)
             }
             Text(title, color = Ink, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)

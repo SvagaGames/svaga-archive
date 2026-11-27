@@ -67,7 +67,7 @@ private class GithubUpdater(private val activity: ComponentActivity) : Updater {
                     .putString("notes", notes).putInt("code", code ?: -1).apply()
                 if (url != null && version.isNotBlank() && newer(version, code)) {
                     apkUrl = url
-                    UpdateState.offer = UpdateOffer(version, notes.takeIf { it.isNotBlank() })
+                    UpdateState.offer = UpdateOffer(version, notes.takeIf { it.isNotBlank() }, code)
                     UpdateState.dismissed = false
                     UpdateState.upToDate = false
                 } else {
@@ -88,7 +88,7 @@ private class GithubUpdater(private val activity: ComponentActivity) : Updater {
         val url = prefs.getString("url", null) ?: return
         if (newer(v, prefs.getInt("code", -1).takeIf { it > 0 })) {
             apkUrl = url
-            UpdateState.offer = UpdateOffer(v, prefs.getString("notes", null))
+            UpdateState.offer = UpdateOffer(v, prefs.getString("notes", null), prefs.getInt("code", -1).takeIf { it > 0 })
         }
     }
 

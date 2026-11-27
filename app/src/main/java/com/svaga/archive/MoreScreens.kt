@@ -174,7 +174,7 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
                 Body(stringResource(R.string.about_text), color = Muted, size = 14.sp)
                 Spacer(Modifier.height(10.dp))
                 Caption(stringResource(R.string.data_credit))
-                Caption(stringResource(R.string.version))
+                Caption(stringResource(R.string.version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE))
             }
             Spacer(Modifier.height(10.dp))
             SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
