@@ -71,6 +71,8 @@ object Push {
             "comment_like" -> ctx.getString(R.string.n_comment_like, name)
             "release" -> ctx.getString(R.string.n_release, name)
             "news" -> ctx.getString(R.string.n_news, p.optString("title"))
+            "anniversary" -> ctx.getString(R.string.n_anniversary, name, ctx.resources.getQuantityString(R.plurals.years_count, p.optInt("years"), p.optInt("years")))
+            "list_like" -> ctx.getString(R.string.n_list_like, name, p.optString("title"))
             else -> null
         }
     }

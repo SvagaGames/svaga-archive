@@ -489,6 +489,24 @@ private fun parseAchItem(a: JSONObject): AchItem = AchItem(
 
 private fun tzMinutes(): Int = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000
 
+
+// ---- 1.7: on this day, daily quiz, game lists ----
+data class AnnivGame(val game: Game, val yearsAgo: Int, val inLibrary: Boolean)
+data class QuizGuess(val gameId: Int, val name: String)
+data class QuizState(
+    val day: String, val image: String, val fx: Float, val fy: Float, val maxAttempts: Int, val attempts: Int,
+    val finished: Boolean, val solved: Boolean, val points: Int, val guesses: List<QuizGuess>,
+    val year: Int?, val platform: String?, val genre: String?, val developer: String?,
+    val answer: Game?, val streak: Int, val playedToday: Int, val solvedToday: Int,
+)
+data class GameList(
+    val id: Long, val title: String, val description: String?, val public: Boolean, val count: Int, val likes: Int,
+    val liked: Boolean, val preview: List<Int>, val mine: Boolean, val ownerId: String, val ownerName: String,
+    val ownerAvatar: Int, val hasGame: Boolean = false,
+)
+data class ListEntry(val gameId: Int, val note: String?)
+data class ListDetail(val list: GameList, val items: List<ListEntry>)
+
 class ApiClient(private val store: TokenStore) {
     private val http = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
@@ -1230,4 +1248,68 @@ class ApiClient(private val store: TokenStore) {
 
 /** Games the server found when it refused to add a duplicate. */
 fun ApiException.duplicateMatches(): List<Game> =
-    (body.optJSONArray("matches") ?: JSONArray()).let { arr -> (0 until arr.length()).map { parseGame(arr.getJSONObject(it)) } }
+    (body.optJSONArray("matches") ?: JSONArray()).let { arr -> (0 until arr.length()).map { parseGame(arr.getJSONObject(it)) } 
+    // ---- 1.7: on this day, daily quiz, game lists ----
+    suspend fun onThisDay(): List<AnnivGame> = io {
+        (call("GET", "/v1/onthisday").optJSONArray("items") ?: JSONArray()).objects().map {
+            AnnivGame(parseGame(it), it.optInt("yearsAgo"), it.optBoolean("inLibrary"))
+        }
+    }
+
+    private fun parseQuiz(o: JSONObject): QuizState {
+        val h = o.optJSONObject("hints") ?: JSONObject()
+        val f = o.optJSONObject("focus") ?: JSONObject()
+        return QuizState(
+            o.optString("day"), o.optString("image"), f.optDouble("x", 0.5).toFloat(), f.optDouble("y", 0.5).toFloat(),
+            o.optInt("maxAttempts", 5), o.optInt("attempts"), o.optBoolean("finished"), o.optBoolean("solved"), o.optInt("points"),
+            (o.optJSONArray("guesses") ?: JSONArray()).objects().map { QuizGuess(it.optInt("gameId"), it.optString("name")) },
+            if (h.has("year") && !h.isNull("year")) h.optInt("year") else null, h.str("platform"), h.str("genre"), h.str("developer"),
+            o.optJSONObject("answer")?.let { parseGame(it) }, o.optInt("streak"), o.optInt("playedToday"), o.optInt("solvedToday"),
+        )
+    }
+
+    suspend fun quizToday(): QuizState = io { parseQuiz(call("GET", "/v1/quiz/today")) }
+    suspend fun quizGuess(gameId: Int): QuizState = io { parseQuiz(call("POST", "/v1/quiz/today/guess", JSONObject().put("gameId", gameId))) }
+    suspend fun quizBoard(week: Boolean): Leaderboard = io {
+        val o = call("GET", "/v1/quiz/leaderboard?period=" + if (week) "week" else "all")
+        fun row(x: JSONObject) = LeaderRow(x.optInt("rank"), x.optString("userId"), x.optString("name"), x.optInt("avatarVersion"), x.optInt("level", 1), x.optLong("value"), x.optBoolean("me"))
+        Leaderboard((o.optJSONArray("items") ?: JSONArray()).objects().map { row(it) }, o.optJSONObject("me")?.let { row(it) })
+    }
+
+    private fun parseList(o: JSONObject): GameList {
+        val owner = o.optJSONObject("owner") ?: JSONObject()
+        return GameList(
+            o.optLong("id"), o.optString("title"), o.str("description"), o.optBoolean("public", true), o.optInt("count"), o.optInt("likes"),
+            o.optBoolean("liked"), (o.optJSONArray("preview") ?: JSONArray()).ints(), o.optBoolean("mine"),
+            owner.optString("id"), owner.optString("name"), owner.optInt("avatarVersion"), o.optBoolean("hasGame"),
+        )
+    }
+    private fun lists(o: JSONObject) = (o.optJSONArray("items") ?: JSONArray()).objects().map { parseList(it) }
+
+    suspend fun popularLists(offset: Int = 0): List<GameList> = io { lists(call("GET", "/v1/lists/popular?offset=$offset")) }
+    suspend fun myLists(gameId: Int? = null): List<GameList> = io { lists(call("GET", "/v1/me/lists" + (gameId?.let { "?gameId=$it" } ?: ""))) }
+    suspend fun userLists(userId: String): List<GameList> = io { lists(call("GET", "/v1/users/$userId/lists")) }
+    suspend fun gameList(id: Long): ListDetail = io {
+        val o = call("GET", "/v1/lists/$id")
+        ListDetail(parseList(o), (o.optJSONArray("items") ?: JSONArray()).objects().map { ListEntry(it.optInt("gameId"), it.str("note")) })
+    }
+    suspend fun createList(title: String, description: String?, public: Boolean, gameId: Int?): Long = io {
+        val b = JSONObject().put("title", title).put("public", public)
+        description?.let { b.put("description", it) }
+        gameId?.let { b.put("gameId", it) }
+        call("POST", "/v1/lists", b).optLong("id")
+    }
+    suspend fun updateList(id: Long, title: String, description: String?, public: Boolean) = io {
+        call("PUT", "/v1/lists/$id", JSONObject().put("title", title).put("description", description ?: "").put("public", public)); Unit
+    }
+    suspend fun deleteList(id: Long) = io { call("DELETE", "/v1/lists/$id"); Unit }
+    suspend fun addToList(id: Long, gameId: Int, note: String? = null) = io {
+        call("PUT", "/v1/lists/$id/items/$gameId", if (note == null) JSONObject() else JSONObject().put("note", note)); Unit
+    }
+    suspend fun removeFromList(id: Long, gameId: Int) = io { call("DELETE", "/v1/lists/$id/items/$gameId"); Unit }
+    suspend fun reorderList(id: Long, gameIds: List<Int>) = io { call("PUT", "/v1/lists/$id/order", JSONObject().put("gameIds", JSONArray(gameIds))); Unit }
+    suspend fun likeList(id: Long): Pair<Boolean, Int> = io {
+        val o = call("POST", "/v1/lists/$id/like")
+        o.optBoolean("liked") to o.optInt("likes")
+    }
+}

@@ -33,6 +33,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val store = TokenStore(app)
     internal val api = ApiClient(store)
     val extras by lazy { Extras(this) }
+    val play by lazy { Play(this) }
     private val settings = app.getSharedPreferences("svaga_settings", Context.MODE_PRIVATE)
     private val offlineStore = OfflineStore(app)
     private val flushMutex = Mutex()
@@ -692,6 +693,15 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 if (offlineStore.pending().isNotEmpty()) flushPending()
                 delay(45_000)
             }
+        }
+    }
+
+    /** The server checks achievements a moment after an action: look for new ones shortly. */
+    fun refreshAfterAchievements() {
+        if (!loggedIn) return
+        viewModelScope.launch {
+            delay(2500)
+            pollNotifications()
         }
     }
 

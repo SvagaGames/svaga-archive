@@ -96,6 +96,7 @@ fun HomeScreen(vm: AppViewModel, nav: Nav, openLibrary: (String) -> Unit, openCa
             }
         }
         item { SeasonCards(vm, nav) }
+        item(key = "play") { HomePlayBlock(vm, nav) }
         if (playing.isNotEmpty()) {
             item {
                 GameShelf(stringResource(R.string.home_playing), playing, vm, nav::game, Modifier.padding(top = 8.dp), onMore = { openLibrary("playing") })

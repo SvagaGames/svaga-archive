@@ -63,6 +63,8 @@ private val LOOKS = mapOf(
     "generous" to AchLook("👍", 0xFF3DDC84, 0xFF3EE0FF),
     "veteran" to AchLook("🎖️", 0xFFB8860B, 0xFF5B6375),
     "retrohunter" to AchLook("🏅", 0xFFE8B84A, 0xFFFF6B3D),
+    "quizmaster" to AchLook("🧩", 0xFFB98BFF, 0xFF4F7CFF),
+    "curator" to AchLook("📚", 0xFF22C3A6, 0xFFFFB547),
     "full_house" to AchLook("🃏", 0xFFFF6EA9, 0xFF6366F1),
     "perfectionist" to AchLook("✨", 0xFFFFD84D, 0xFFB98BFF),
     "ra_link" to AchLook("🔗", 0xFFE8B84A, 0xFF4F7CFF),

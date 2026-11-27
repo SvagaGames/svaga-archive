@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
@@ -273,6 +274,8 @@ fun notificationText(n: NotificationItem): String {
         "comment_like" -> stringResource(R.string.n_comment_like, name)
         "release" -> stringResource(R.string.n_release, name)
         "news" -> stringResource(R.string.n_news, n.payload.optString("title"))
+        "anniversary" -> stringResource(R.string.n_anniversary, name, androidx.compose.ui.platform.LocalContext.current.resources.getQuantityString(R.plurals.years_count, n.payload.optInt("years"), n.payload.optInt("years")))
+        "list_like" -> stringResource(R.string.n_list_like, name, n.payload.optString("title"))
         else -> n.kind
     }
 }
@@ -290,7 +293,8 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
             items(vm.notifications, key = { it.id }) { n ->
                 val (icon, color) = when (n.kind) {
                     "achievement", "level_up" -> Icons.Filled.Star to Amber
-                    "comment_like" -> Icons.Filled.Favorite to Pink
+                    "comment_like", "list_like" -> Icons.Filled.Favorite to Pink
+                    "anniversary", "release" -> Icons.Filled.DateRange to Amber
                     else -> Icons.Filled.Person to Cyan
                 }
                 Row(
@@ -304,7 +308,11 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
                                     val uid = n.payload.optString("userId")
                                     if (uid.isNotEmpty()) nav.user(uid)
                                 }
-                                "comment_like", "release" -> {
+                                "list_like" -> {
+                                    val lid = n.payload.optLong("listId", 0L)
+                                    if (lid > 0) nav.go(Routes.list(lid))
+                                }
+                                "comment_like", "release", "anniversary" -> {
                                     val gid = n.payload.optInt("gameId", 0)
                                     if (gid > 0) nav.game(gid)
                                 }

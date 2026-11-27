@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -64,6 +65,8 @@ private fun launchEmulator(context: Context, gameId: Int, name: String) {
 
 @Composable
 fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
+    var addToList by remember { mutableStateOf(false) }
+    if (addToList) AddToListDialog(vm, id) { addToList = false }
     LaunchedEffect(id) {
         vm.loadGameDetail(id)
         vm.ensureTranslation(id)
@@ -132,6 +135,8 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                     Spacer(Modifier.width(10.dp))
                     val fav = entry?.favorite == true
                     IconBtn(if (fav) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder, { vm.setFavorite(id, !fav) }, tint = if (fav) Pink else Ink, size = 50.dp)
+                    Spacer(Modifier.width(10.dp))
+                    IconBtn(Icons.Filled.Menu, { addToList = true }, size = 50.dp)
                     Spacer(Modifier.width(10.dp))
                     IconBtn(Icons.Filled.Share, { share = true }, size = 50.dp)
                 }

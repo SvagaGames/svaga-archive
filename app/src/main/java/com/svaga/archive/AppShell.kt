@@ -159,6 +159,11 @@ object Routes {
     const val RA = "retroachievements"
     const val LEADERBOARD = "leaderboard"
     const val CHALLENGES = "challenges"
+    const val QUIZ = "quiz"
+    const val WHEEL = "wheel"
+    const val LISTS = "lists"
+    fun list(id: Long) = "list/$id"
+    fun userLists(id: String) = "lists/user/$id"
     fun game(id: Int) = "game/$id"
     fun user(id: String) = "user/$id"
 }
@@ -200,6 +205,15 @@ fun MainNav(vm: AppViewModel) {
         composable(Routes.RA) { RaScreen(vm, nav) }
         composable(Routes.LEADERBOARD) { LeaderboardScreen(vm, nav) }
         composable(Routes.CHALLENGES) { ChallengesAdminScreen(vm, nav) }
+        composable(Routes.QUIZ) { QuizScreen(vm, nav) }
+        composable(Routes.WHEEL) { WheelScreen(vm, nav) }
+        composable(Routes.LISTS) { ListsScreen(vm, nav) }
+        composable("list/{id}", arguments = listOf(navArgument("id") { type = NavType.LongType })) { e ->
+            ListScreen(vm, nav, e.arguments?.getLong("id") ?: 0L)
+        }
+        composable("lists/user/{id}", arguments = listOf(navArgument("id") { type = NavType.StringType })) { e ->
+            ListsScreen(vm, nav, e.arguments?.getString("id"))
+        }
     }
 }
 

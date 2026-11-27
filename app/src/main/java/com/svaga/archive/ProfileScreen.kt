@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -251,6 +252,8 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
             SettingRow(Icons.Filled.Star, stringResource(R.string.board_title), onClick = { nav.go(Routes.LEADERBOARD) })
             Divider1()
             SettingRow(Icons.Filled.Home, stringResource(R.string.collection_mine), onClick = { nav.go(Routes.COLLECTION) })
+            Divider1(Modifier.padding(start = 64.dp))
+            SettingRow(Icons.Filled.Menu, stringResource(R.string.lists_mine), onClick = { nav.go(Routes.LISTS) })
             Divider1()
             SettingRow(Icons.Filled.Favorite, stringResource(R.string.people_friends), value = vm.friends.friends.size.toString(), onClick = { nav.go(Routes.PEOPLE) })
             Divider1()
@@ -323,6 +326,7 @@ fun UserProfileScreen(vm: AppViewModel, id: String, nav: Nav) {
         }
         Spacer(Modifier.height(12.dp))
         LevelBar(prof.level, prof.sp, prof.levelFrom, prof.levelTo)
+        SvButton(stringResource(R.string.lists_of_player), { nav.go(Routes.userLists(id)) }, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), kind = BtnKind.Secondary, icon = Icons.Filled.Menu)
         if (prof.featured.isNotEmpty()) {
             Spacer(Modifier.height(12.dp))
             SectionHeader(stringResource(R.string.ach_title), count = prof.achievements)
