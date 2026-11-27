@@ -65,7 +65,6 @@ jobs:
           [ -f CHANGELOG.md ] && NOTES="$(awk '/^## /{n++} n==1' CHANGELOG.md)"
           # the build number lets the app compare versions even if the version name ever goes down (1.7.0 -> 1.0)
           CODE=$(grep -o 'versionCode = [0-9]*' app/build.gradle.kts | grep -o '[0-9]*')
-          NOTES="$NOTES
-<!-- vc:$CODE -->"
+          NOTES="$(printf '%s\n\n<!-- vc:%s -->' "$NOTES" "$CODE")"
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           gh release create "$TAG" out/* --title "Svaga Archive $VERSION" --notes "$NOTES" --latest
