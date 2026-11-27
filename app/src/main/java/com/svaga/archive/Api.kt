@@ -605,6 +605,22 @@ class ApiClient(private val store: TokenStore) {
         saveSession(execute("POST", "/v1/auth/oauth/exchange", JSONObject().put("code", code), false))
     }
 
+    /**
+     * Yandex through the phone: our server cannot reach Yandex, so the app asks Yandex for the profile itself.
+     * Yandex answers with a JWT signed with the app's secret; the server checks the signature and finishes the sign-in.
+     * Returns the same answer as the deep link: code / linked / error.
+     */
+    suspend fun yandexViaPhone(token: String, state: String): JSONObject = io {
+        val req = Request.Builder().url("https://login.yandex.ru/info?format=jwt")
+            .header("Authorization", "OAuth $token").get().build()
+        val jwt = http.newCall(req).execute().use { r ->
+            val t = r.body?.string().orEmpty().trim()
+            if (!r.isSuccessful || t.count { it == '.' } != 2) throw ApiException("provider", r.code)
+            t
+        }
+        execute("POST", "/v1/auth/oauth/yandex/jwt", JSONObject().put("state", state).put("jwt", jwt), false)
+    }
+
     suspend fun identities(): IdentitiesResult = io {
         val o = call("GET", "/v1/me/identities")
         val items = o.optJSONArray("items")

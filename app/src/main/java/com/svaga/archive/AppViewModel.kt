@@ -436,6 +436,23 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     /** svagaarchive://auth?code=... (sign-in), ?linked=google (account linked) or ?error=... */
     fun handleDeepLink(uri: Uri?) {
         if (uri == null || uri.scheme != "svagaarchive" || uri.host != "auth") return
+        val ytoken = uri.getQueryParameter("ytoken")
+        if (ytoken != null) {
+            val state = uri.getQueryParameter("state").orEmpty()
+            viewModelScope.launch {
+                val answer = try {
+                    api.yandexViaPhone(ytoken, state)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    org.json.JSONObject().put("error", "provider")
+                }
+                val b = Uri.parse("svagaarchive://auth").buildUpon()
+                answer.keys().forEach { k -> b.appendQueryParameter(k, answer.optString(k)) }
+                handleDeepLink(b.build())
+            }
+            return
+        }
         val code = uri.getQueryParameter("code")
         val linked = uri.getQueryParameter("linked")
         val error = uri.getQueryParameter("error")
