@@ -154,7 +154,7 @@
     <string name="lang_subtitles">Subtitles</string>
     <string name="lang_interface">Interface</string>
     <string name="about_title">ABOUT THE APP</string>
-    <string name="about_text">Svaga Archive is a retro gamer's journal by Svaga Games: your library and backlog, ratings and reviews, achievements, the season pass, the daily quiz, bingo and friends — all in one place. Fonts: Press Start 2P and Share Tech Mono (SIL OFL).</string>
+    <string name="about_text">Svaga Archive is a retro gamer\'s journal by Svaga Games: your library and backlog, ratings and reviews, achievements, the season pass, the daily quiz, bingo and friends — all in one place. Fonts: Press Start 2P and Share Tech Mono (SIL OFL).</string>
     <string name="ach2_collector_t">Collector</string>
     <string name="ach2_collector_d">Keep %1$d games in your library</string>
     <string name="ach2_conqueror_t">Game Conqueror</string>
