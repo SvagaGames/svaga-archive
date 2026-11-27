@@ -19,6 +19,11 @@ import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+/** Build number hidden in the release notes (<!-- vc:29 -->); compared first, the version name only as a fallback. */
+private fun buildOf(body: String): Int? = Regex("<!--\\s*vc:(\\d+)\\s*-->").find(body)?.groupValues?.get(1)?.toIntOrNull()
+private fun newer(version: String, code: Int?): Boolean =
+    if (code != null) code > BuildConfig.VERSION_CODE else isNewer(version, BuildConfig.VERSION_NAME)
+
 /** GitHub build: checks the latest release of SvagaGames/svaga-archive, downloads the APK and hands it to the installer. */
 fun createUpdater(activity: ComponentActivity): Updater = GithubUpdater(activity)
 
@@ -55,11 +60,14 @@ private class GithubUpdater(private val activity: ComponentActivity) : Updater {
                     val a = assets.getJSONObject(i)
                     if (a.optString("name") == "SvagaArchive.apk") url = a.optString("browser_download_url")
                 }
+                val body = o.optString("body")
+                val code = buildOf(body)
+                val notes = body.replace(Regex("<!--.*?-->"), "").trim()
                 prefs.edit().putLong("last_check", now).putString("version", version).putString("url", url)
-                    .putString("notes", o.optString("body")).apply()
-                if (url != null && version.isNotBlank() && isNewer(version, BuildConfig.VERSION_NAME)) {
+                    .putString("notes", notes).putInt("code", code ?: -1).apply()
+                if (url != null && version.isNotBlank() && newer(version, code)) {
                     apkUrl = url
-                    UpdateState.offer = UpdateOffer(version, o.optString("body").takeIf { it.isNotBlank() })
+                    UpdateState.offer = UpdateOffer(version, notes.takeIf { it.isNotBlank() })
                     UpdateState.dismissed = false
                     UpdateState.upToDate = false
                 } else {
@@ -78,7 +86,7 @@ private class GithubUpdater(private val activity: ComponentActivity) : Updater {
     private fun restore() {
         val v = prefs.getString("version", null) ?: return
         val url = prefs.getString("url", null) ?: return
-        if (isNewer(v, BuildConfig.VERSION_NAME)) {
+        if (newer(v, prefs.getInt("code", -1).takeIf { it > 0 })) {
             apkUrl = url
             UpdateState.offer = UpdateOffer(v, prefs.getString("notes", null))
         }
