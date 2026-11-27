@@ -323,6 +323,7 @@ fun UserProfileScreen(vm: AppViewModel, id: String, nav: Nav) {
                 compact(lib?.count { it.rating != null } ?: 0) to stringResource(R.string.num_rated),
             ),
         )
+        if (p.id != vm.userId) CompatCard(vm, nav, p.id)
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             when (p.relation) {
                 "none" -> SvButton(stringResource(R.string.friend_add), { vm.friendAction(p.id, "add") }, Modifier.weight(1f))

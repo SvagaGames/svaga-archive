@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -385,8 +386,17 @@ fun BingoScreen(vm: AppViewModel, nav: Nav) {
     val f = vm.flair
     LaunchedEffect(Unit) { f.loadBingo() }
     var open by remember { mutableStateOf<BingoCell?>(null) }
+    var share by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(Bg)) {
-        TopBar(stringResource(R.string.bingo_title), nav::back, subtitle = stringResource(R.string.bingo_subtitle))
+        TopBar(stringResource(R.string.bingo_title), nav::back, subtitle = stringResource(R.string.bingo_subtitle)) {
+            if (f.bingo != null) IconBtn(Icons.Filled.Share, { share = true })
+        }
+        f.bingo?.let { cur ->
+            if (share) {
+                val text = stringResource(R.string.bingo_share_text, cur.lines.size, cur.linesTotal)
+                ShareDialog(text, { share = false }) { BingoShareCard(cur, vm.displayName) }
+            }
+        }
         val b = f.bingo
         when {
             b == null && f.bingoError != null -> { ErrorState(stringResource(f.bingoError!!), { f.loadBingo() }); return@Column }

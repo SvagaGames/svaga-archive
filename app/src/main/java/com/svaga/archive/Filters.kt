@@ -78,6 +78,20 @@ private val ACH_TITLE: Map<String, Int> = mapOf(
     "quizmaster" to R.string.ach2_quizmaster_t,
     "curator" to R.string.ach2_curator_t,
     "bingo" to R.string.ach2_bingo_t,
+    "decades" to R.string.ach2_decades_t,
+    "globetrotter" to R.string.ach2_globetrotter_t,
+    "quizstreak" to R.string.ach2_quizstreak_t,
+    "sharpshooter" to R.string.ach2_sharpshooter_t,
+    "tastemaker" to R.string.ach2_tastemaker_t,
+    "speedrunner" to R.string.ach2_speedrunner_t,
+    "steady" to R.string.ach2_steady_t,
+    "superfan" to R.string.ach2_superfan_t,
+    "longhaul" to R.string.ach2_longhaul_t,
+    "soulmate" to R.string.ach2_soulmate_t,
+    "time_capsule" to R.string.ach2_time_capsule_t,
+    "old_soul" to R.string.ach2_old_soul_t,
+    "console_wars" to R.string.ach2_console_wars_t,
+    "blackout" to R.string.ach2_blackout_t,
     "full_house" to R.string.ach2_full_house_t,
     "perfectionist" to R.string.ach2_perfectionist_t,
     "ra_link" to R.string.ach2_ra_link_t,
@@ -122,6 +136,20 @@ private val ACH_DESC: Map<String, Int> = mapOf(
     "quizmaster" to R.string.ach2_quizmaster_d,
     "curator" to R.string.ach2_curator_d,
     "bingo" to R.string.ach2_bingo_d,
+    "decades" to R.string.ach2_decades_d,
+    "globetrotter" to R.string.ach2_globetrotter_d,
+    "quizstreak" to R.string.ach2_quizstreak_d,
+    "sharpshooter" to R.string.ach2_sharpshooter_d,
+    "tastemaker" to R.string.ach2_tastemaker_d,
+    "speedrunner" to R.string.ach2_speedrunner_d,
+    "steady" to R.string.ach2_steady_d,
+    "superfan" to R.string.ach2_superfan_d,
+    "longhaul" to R.string.ach2_longhaul_d,
+    "soulmate" to R.string.ach2_soulmate_d,
+    "time_capsule" to R.string.ach2_time_capsule_d,
+    "old_soul" to R.string.ach2_old_soul_d,
+    "console_wars" to R.string.ach2_console_wars_d,
+    "blackout" to R.string.ach2_blackout_d,
     "full_house" to R.string.ach2_full_house_d,
     "perfectionist" to R.string.ach2_perfectionist_d,
     "ra_link" to R.string.ach2_ra_link_d,
@@ -142,7 +170,7 @@ private val LEVEL_NAMES = listOf(
 
 private val TIER_NAMES = listOf(R.string.tier_1, R.string.tier_2, R.string.tier_3, R.string.tier_4, R.string.tier_5)
 
-val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "quizmaster", "curator", "bingo", "theme", "season", "secret")
+val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "quizmaster", "curator", "bingo", "decades", "globetrotter", "quizstreak", "sharpshooter", "tastemaker", "speedrunner", "steady", "superfan", "longhaul", "theme", "season", "secret")
 
 @Composable
 fun achTitle(code: String): String = when (code) {
@@ -160,7 +188,7 @@ fun achDescription(code: String, tier: Int, goal: Int): String {
         return runCatching { String.format(text, goal) }.getOrDefault(text)
     }
     val res = ACH_DESC[code] ?: return ""
-    return if (code in setOf("pioneer", "founder", "svaga_explorer", "supporter", "anniversary", "full_house", "perfectionist", "ra_link", "steam_link", "svaga_fan", "hidden_gem")) stringResource(res)
+    return if (code in setOf("pioneer", "founder", "svaga_explorer", "supporter", "anniversary", "full_house", "perfectionist", "ra_link", "steam_link", "svaga_fan", "hidden_gem", "soulmate", "time_capsule", "old_soul", "console_wars", "blackout")) stringResource(res)
     else stringResource(res, goal)
 }
 

@@ -103,7 +103,10 @@ fun LibraryScreen(vm: AppViewModel, nav: Nav, status: String, onStatus: (String)
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
-                    Text(stringResource(R.string.games_count, entries.size), color = Muted, fontSize = 13.sp)
+                    Column {
+                        Text(stringResource(R.string.games_count, entries.size), color = Muted, fontSize = 13.sp)
+                        BacklogForecastLine(vm)
+                    }
                 }
                 items(entries, key = { it.gameId }) { item ->
                     val g = vm.gamesCache[item.gameId]

@@ -157,6 +157,7 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                 }
                 Spacer(Modifier.height(10.dp))
                 PlaytimeRow(vm, id)
+                TtbRow(vm, id)
 
                 // ---------- my rating ----------
                 SectionHeader(stringResource(R.string.your_rating), Modifier.padding(top = 10.dp))

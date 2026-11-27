@@ -201,6 +201,9 @@ data class PublicProfile(
 // ---- 1.1: retro bingo, profile frames and backgrounds ----
 data class BingoCell(val id: String, val title: String, val emoji: String, val goal: Int, val progress: Int, val done: Boolean)
 data class Bingo(val season: String, val endsAt: String, val cells: List<BingoCell>, val lines: List<Int>, val linesTotal: Int, val full: Boolean)
+data class Ttb(val main: Double?, val extra: Double?, val full: Double?)
+data class Forecast(val games: Int, val known: Int, val hours: Int)
+data class Compat(val hidden: Boolean, val percent: Int, val shared: Int, val lovedBoth: List<Int>, val theyHave: List<Int>, val iHave: List<Int>)
 data class CosItem(val code: String, val unlocked: Boolean, val kind: String?, val progress: Int, val goal: Int)
 data class Cosmetics(val frame: String, val background: String, val frames: List<CosItem>, val backgrounds: List<CosItem>)
 
@@ -1061,6 +1064,24 @@ class ApiClient(private val store: TokenStore) {
         val o = call("PUT", "/v1/me/cosmetics", b)
         o.optString("frame", "none") to o.optString("background", "none")
     }
+    suspend fun ttb(gameId: Int): Ttb? = io {
+        val t = call("GET", "/v1/games/$gameId/ttb").optJSONObject("ttb") ?: return@io null
+        fun d(k: String) = if (t.isNull(k)) null else t.optDouble(k).takeIf { it > 0 }
+        Ttb(d("main"), d("extra"), d("full"))
+    }
+    suspend fun backlogForecast(): Forecast = io {
+        val o = call("GET", "/v1/me/backlog-forecast")
+        Forecast(o.optInt("games"), o.optInt("known"), o.optInt("hours"))
+    }
+    suspend fun compat(userId: String): Compat = io {
+        val o = call("GET", "/v1/users/$userId/compat")
+        Compat(
+            o.optBoolean("hidden"), o.optInt("percent"), o.optInt("shared"),
+            (o.optJSONArray("lovedBoth") ?: JSONArray()).ints(), (o.optJSONArray("theyHave") ?: JSONArray()).ints(),
+            (o.optJSONArray("iHave") ?: JSONArray()).ints(),
+        )
+    }
+
     suspend fun setNotifyComeback(value: Boolean): Boolean = io {
         call("PATCH", "/v1/me", JSONObject().put("notifyComeback", value)).optBoolean("notifyComeback", value)
     }
