@@ -166,6 +166,7 @@ private fun FriendEventRow(e: FriendEvent, vm: AppViewModel, nav: Nav) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(e.name, color = Ink, fontSize = 15.sp, fontWeight = FontWeight.Bold, maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                NickBadge(e.badge)
                 Spacer(Modifier.width(8.dp))
                 Caption(relativeTime(e.at), maxLines = 1)
             }
@@ -237,6 +238,7 @@ fun PersonRow(p: Person, onClick: () -> Unit, onAction: (String) -> Unit) {
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Body(p.name, size = 16.sp, weight = FontWeight.SemiBold, maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                NickBadge(p.badge)
                 if (p.creator) {
                     Spacer(Modifier.width(6.dp))
                     Pill(stringResource(R.string.creator_badge), Amber)

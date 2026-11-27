@@ -295,7 +295,10 @@ fun CommentCard(
             Avatar(c.userId, c.avatarVersion, c.name, 38.dp, Modifier.then(if (onOpenUser != null) Modifier.clickable(onClick = onOpenUser) else Modifier))
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f)) {
-                Body(c.name, size = 15.sp, weight = FontWeight.SemiBold, maxLines = 1, modifier = if (onOpenUser != null) Modifier.clickable(onClick = onOpenUser) else Modifier)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Body(c.name, size = 15.sp, weight = FontWeight.SemiBold, maxLines = 1, modifier = (if (onOpenUser != null) Modifier.clickable(onClick = onOpenUser) else Modifier).weight(1f, fill = false))
+                    NickBadge(c.badge)
+                }
                 Caption(relativeTime(c.createdAt), maxLines = 1)
             }
             c.rating?.let { StarBadge(it.toString(), color = Cyan) }

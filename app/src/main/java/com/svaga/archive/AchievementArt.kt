@@ -80,6 +80,8 @@ private val LOOKS = mapOf(
     "old_soul" to AchLook("👴", 0xFF9AA3B5, 0xFF5B6375),
     "console_wars" to AchLook("⚔️", 0xFFFF5A6A, 0xFF4F7CFF),
     "blackout" to AchLook("🌈", 0xFFFF5A6A, 0xFF3EE0FF),
+    "seasonpass" to AchLook("🎟️", 0xFF3EE0FF, 0xFFB98BFF),
+    "dressed_up" to AchLook("🎩", 0xFFFFD36A, 0xFFFF6EA9),
     "full_house" to AchLook("🃏", 0xFFFF6EA9, 0xFF6366F1),
     "perfectionist" to AchLook("✨", 0xFFFFD84D, 0xFFB98BFF),
     "ra_link" to AchLook("🔗", 0xFFE8B84A, 0xFF4F7CFF),

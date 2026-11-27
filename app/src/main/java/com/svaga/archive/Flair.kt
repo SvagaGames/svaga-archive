@@ -84,9 +84,32 @@ class Flair(private val vm: AppViewModel) {
 
     fun loadCosmetics() = run { cos = vm.api.cosmetics() }
 
-    fun equip(frame: String? = null, background: String? = null) = run({ vm.showNotice(it) }) {
-        val (f, b) = vm.api.setCosmetics(frame, background)
-        cos = cos?.copy(frame = f, background = b)
+    var season by mutableStateOf<SeasonPass?>(null)
+        private set
+    var seasonError by mutableStateOf<Int?>(null)
+        private set
+    var seasonTop by mutableStateOf<List<SeasonTopRow>?>(null)
+        private set
+
+    fun loadSeason(fresh: Boolean = false) = run({ seasonError = it }) {
+        seasonError = null
+        val before = season?.level ?: -1
+        val s = vm.api.season(fresh)
+        season = s
+        if (before >= 0 && s.level > before) {
+            vm.refreshAfterAchievements()
+            cos = vm.api.cosmetics()
+        }
+    }
+
+    fun loadSeasonTop(friends: Boolean) = run {
+        seasonTop = null
+        seasonTop = vm.api.seasonTop(friends)
+    }
+
+    fun equip(frame: String? = null, background: String? = null, badge: String? = null) = run({ vm.showNotice(it) }) {
+        val (f, b, n) = vm.api.setCosmetics(frame, background, badge)
+        cos = cos?.copy(frame = f, background = b, badge = n)
         vm.showNotice(R.string.flair_saved)
     }
 
@@ -110,13 +133,29 @@ private val Legend = listOf(Color(0xFFB98BFF), Color(0xFFFFD36A), Color(0xFF7A4D
 val FRAME_NAMES = mapOf(
     "none" to R.string.frame_none, "neon" to R.string.frame_neon, "retro" to R.string.frame_retro, "pixel" to R.string.frame_pixel,
     "gold" to R.string.frame_gold, "ice" to R.string.frame_ice, "fire" to R.string.frame_fire, "rainbow" to R.string.frame_rainbow,
-    "legend" to R.string.frame_legend, "creator" to R.string.frame_creator,
+    "legend" to R.string.frame_legend, "season" to R.string.frame_season, "champion" to R.string.frame_champion, "creator" to R.string.frame_creator,
 )
 val BG_NAMES = mapOf(
     "none" to R.string.bg_none, "night" to R.string.bg_night, "sunset" to R.string.bg_sunset, "cart" to R.string.bg_cart,
     "grid" to R.string.bg_grid, "bingo" to R.string.bg_bingo, "stars" to R.string.bg_stars, "aurora" to R.string.bg_aurora,
-    "creator" to R.string.bg_creator,
+    "season" to R.string.bg_season, "creator" to R.string.bg_creator,
 )
+
+/** Badge next to the nickname: emoji + name. */
+val BADGES = mapOf(
+    "og" to ("🕹️" to R.string.badge_og), "fox" to ("🦊" to R.string.badge_fox), "collector" to ("📦" to R.string.badge_collector),
+    "finisher" to ("🏁" to R.string.badge_finisher), "brain" to ("🧠" to R.string.badge_brain), "flame" to ("🔥" to R.string.badge_flame),
+    "curator" to ("📝" to R.string.badge_curator), "star" to ("⭐" to R.string.badge_star), "bingo" to ("🎱" to R.string.badge_bingo),
+    "spark" to ("⚡" to R.string.badge_spark), "comet" to ("☄️" to R.string.badge_comet), "crown" to ("👑" to R.string.badge_crown),
+    "trophy" to ("🏆" to R.string.badge_trophy), "creator" to ("🛠️" to R.string.badge_creator),
+)
+
+@Composable
+fun NickBadge(code: String?, size: androidx.compose.ui.unit.TextUnit = 15.sp) {
+    val b = BADGES[code ?: return] ?: return
+    Spacer(Modifier.width(5.dp))
+    Text(b.first, fontSize = size, maxLines = 1)
+}
 
 /** Avatar in the chosen frame. "none" is the usual accent ring. */
 @Composable
@@ -178,6 +217,20 @@ private fun DrawScope.drawFrame(frame: String, spin: Float, pulse: Float) {
             rotate(spin) { ring(Brush.sweepGradient(Legend), w * 1.2f) }
             rotate(-spin) { ring(Brush.sweepGradient(Legend.reversed()), w * 0.6f, inset = w * 1.5f) }
             drawCircle(Color(0xFFFFD36A).copy(alpha = 0.22f * pulse), radius = size.minDimension / 2, style = Stroke(w * 2.4f))
+        }
+        "season" -> {
+            rotate(spin) { ring(Brush.sweepGradient(listOf(Color(0xFF3EE0FF), Color(0xFF4F7CFF), Color(0xFFB98BFF), Color(0xFF3EE0FF))), w * 1.3f) }
+            val n = 8
+            for (i in 0 until n) {
+                val a = Math.toRadians(i * 360.0 / n + spin)
+                val r = size.minDimension / 2 - w * 0.65f
+                drawCircle(Color.White.copy(alpha = 0.5f + 0.5f * pulse), w * 0.32f, Offset(center.x + (r * cos(a)).toFloat(), center.y + (r * sin(a)).toFloat()))
+            }
+        }
+        "champion" -> {
+            drawCircle(Color(0xFFFFD36A).copy(alpha = 0.35f * pulse), radius = size.minDimension / 2, style = Stroke(w * 2.6f))
+            rotate(spin / 2) { ring(Brush.sweepGradient(Gold), w * 1.5f) }
+            rotate(-spin) { ring(Brush.sweepGradient(listOf(Color(0xFFFF5A6A), Color(0xFFFFD36A), Color(0xFFFF5A6A))), w * 0.5f, inset = w * 1.7f) }
         }
         "creator" -> {
             rotate(spin / 2) { ring(Brush.sweepGradient(listOf(Amber, Cyan, Amber, Cyan, Amber)), w * 1.3f) }
@@ -244,6 +297,14 @@ private fun DrawScope.drawBg(code: String) {
             drawRect(Brush.linearGradient(listOf(Color(0x003DDC84), Color(0x663DDC84), Color(0x553EE0FF), Color(0x44B98BFF), Color(0x00B98BFF)), Offset(0f, 0f), Offset(size.width, size.height * 0.6f)))
             stars(25, 3)
         }
+        "season" -> {
+            drawRect(Brush.verticalGradient(listOf(Color(0xFF0C1C3A), Color(0xFF1A1150), Color(0x000A0C11))))
+            for (i in 0..5) {
+                val x = size.width * (0.1f + i * 0.17f)
+                drawLine(Brush.verticalGradient(listOf(Color(0x003EE0FF), Color(0x553EE0FF), Color(0x00B98BFF))), Offset(x, 0f), Offset(x - size.width * 0.25f, size.height * 0.8f), 3.dp.toPx())
+            }
+            stars(30, 5)
+        }
         "creator" -> drawRect(Brush.verticalGradient(listOf(Color(0xFF3B2A0A), Color(0xFF241A06), Color(0x000A0C11))))
     }
 }
@@ -271,6 +332,9 @@ private fun unlockHint(it: CosItem): String = when (it.kind) {
     "quiz" -> stringResource(R.string.unlock_quiz, it.goal)
     "shelf" -> stringResource(R.string.unlock_shelf, it.goal)
     "creator" -> stringResource(R.string.unlock_creator)
+    "seasonLevel" -> stringResource(R.string.unlock_season, it.goal)
+    "lists" -> stringResource(R.string.unlock_lists, it.goal)
+    "early" -> stringResource(R.string.unlock_early)
     else -> ""
 }
 
@@ -291,25 +355,34 @@ fun CosmeticsScreen(vm: AppViewModel, nav: Nav) {
             FramedAvatar(vm.userId, vm.avatarVersion, vm.displayName.ifBlank { vm.email }, 96.dp, c.frame)
             Spacer(Modifier.width(16.dp))
             Column {
-                H2(vm.displayName.ifBlank { stringResource(R.string.app_name) })
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    H2(vm.displayName.ifBlank { stringResource(R.string.app_name) })
+                    NickBadge(c.badge, 20.sp)
+                }
                 Caption(stringResource(FRAME_NAMES[c.frame] ?: R.string.frame_none) + " · " + stringResource(BG_NAMES[c.background] ?: R.string.bg_none))
             }
         }
-        Segmented(listOf(stringResource(R.string.flair_frames), stringResource(R.string.flair_backgrounds)), tab, { tab = it }, Modifier.padding(16.dp))
-        val list = if (tab == 0) c.frames else c.backgrounds
+        Segmented(listOf(stringResource(R.string.flair_frames), stringResource(R.string.flair_backgrounds), stringResource(R.string.flair_badges)), tab, { tab = it }, Modifier.padding(16.dp))
+        val list = when (tab) { 0 -> c.frames; 1 -> c.backgrounds; else -> c.badges }
         LazyVerticalGrid(GridCells.Fixed(3), Modifier.weight(1f), contentPadding = PaddingValues(16.dp, 0.dp, 16.dp, 24.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             items(list, key = { it.code }) { it ->
-                val selected = if (tab == 0) c.frame == it.code else c.background == it.code
+                val selected = when (tab) { 0 -> c.frame == it.code; 1 -> c.background == it.code; else -> c.badge == it.code }
                 Column(
                     Modifier.clip(RoundedCornerShape(16.dp)).background(Panel)
                         .border(if (selected) 2.dp else 1.dp, if (selected) Cyan else com.svaga.archive.Stroke, RoundedCornerShape(16.dp))
-                        .clickable(enabled = it.unlocked && !selected) { if (tab == 0) f.equip(frame = it.code) else f.equip(background = it.code) }
+                        .clickable(enabled = it.unlocked && !selected) {
+                            when (tab) { 0 -> f.equip(frame = it.code); 1 -> f.equip(background = it.code); else -> f.equip(badge = it.code) }
+                        }
                         .padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        if (tab == 0) {
+                        if (tab == 2) {
+                            Box(Modifier.size(64.dp).clip(CircleShape).background(Panel2), contentAlignment = Alignment.Center) {
+                                Text(BADGES[it.code]?.first ?: "∅", fontSize = 30.sp, color = Muted)
+                            }
+                        } else if (tab == 0) {
                             FramedAvatar(vm.userId, vm.avatarVersion, vm.displayName, 64.dp, it.code)
                         } else {
                             Box(Modifier.size(84.dp, 64.dp).clip(RoundedCornerShape(10.dp)).background(Bg).profileBackground(it.code))
@@ -322,7 +395,9 @@ fun CosmeticsScreen(vm: AppViewModel, nav: Nav) {
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        stringResource((if (tab == 0) FRAME_NAMES else BG_NAMES)[it.code] ?: R.string.frame_none),
+                        stringResource(
+                            when (tab) { 0 -> FRAME_NAMES[it.code]; 1 -> BG_NAMES[it.code]; else -> BADGES[it.code]?.second } ?: R.string.frame_none,
+                        ),
                         color = if (selected) Cyan else Ink, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1, textAlign = TextAlign.Center,
                     )
                     if (!it.unlocked) {

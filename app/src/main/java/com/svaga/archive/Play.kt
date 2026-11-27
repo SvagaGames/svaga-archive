@@ -264,6 +264,7 @@ fun HomePlayBlock(vm: AppViewModel, nav: Nav) {
             nav.go(Routes.WHEEL)
         }
     }
+    SeasonTile(vm, nav, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp))
     BingoTile(vm, nav, Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp))
     val an = play.anniv
     if (an.isNotEmpty()) {
@@ -429,7 +430,10 @@ private fun SimpleBoardRow(r: LeaderRow, onClick: () -> Unit) {
         Text(when (r.rank) { 1 -> "🥇"; 2 -> "🥈"; 3 -> "🥉"; else -> "${r.rank}" }, color = Muted, fontSize = 16.sp, modifier = Modifier.width(36.dp))
         Avatar(r.userId, r.avatarVersion, r.name, 36.dp)
         Spacer(Modifier.width(10.dp))
-        Body(r.name, Modifier.weight(1f), weight = FontWeight.SemiBold, maxLines = 1)
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            Body(r.name, Modifier.weight(1f, fill = false), weight = FontWeight.SemiBold, maxLines = 1)
+            NickBadge(r.badge)
+        }
         Body(compact(r.value), color = Amber, weight = FontWeight.Bold)
     }
 }

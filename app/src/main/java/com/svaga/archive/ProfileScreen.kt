@@ -55,6 +55,7 @@ private fun ProfileHeader(
     creator: Boolean,
     frame: String = "none",
     background: String = "none",
+    badge: String? = null,
     onAvatar: (() -> Unit)? = null,
 ) {
     Row(
@@ -73,7 +74,10 @@ private fun ProfileHeader(
         }
         Spacer(Modifier.width(18.dp))
         Column(Modifier.weight(1f)) {
-            Text(name, color = Ink, fontSize = 26.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 30.sp)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(name, color = Ink, fontSize = 26.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis, lineHeight = 30.sp, modifier = Modifier.weight(1f, fill = false))
+                NickBadge(badge, 22.sp)
+            }
             Spacer(Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Pill(stringResource(R.string.level_n, level), Cyan)
@@ -203,7 +207,7 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
         val cos = vm.flair.cos
         ProfileHeader(
             vm.userId, vm.avatarVersion, name, vm.createdAt, ach?.level ?: vm.level, vm.role == "creator",
-            frame = cos?.frame ?: "none", background = cos?.background ?: "none",
+            frame = cos?.frame ?: "none", background = cos?.background ?: "none", badge = cos?.badge,
         ) { picker.launch("image/*") }
         vm.profileError?.let { Body(stringResource(it), Modifier.padding(horizontal = 20.dp), color = Red) }
         NumbersRow(
@@ -313,7 +317,7 @@ fun UserProfileScreen(vm: AppViewModel, id: String, nav: Nav) {
             return@Column
         }
         val p = prof.person
-        ProfileHeader(p.id, p.avatarVersion, p.name, p.createdAt, prof.level, p.creator, frame = prof.frame, background = prof.background)
+        ProfileHeader(p.id, p.avatarVersion, p.name, p.createdAt, prof.level, p.creator, frame = prof.frame, background = prof.background, badge = prof.badge)
         val lib = prof.library
         NumbersRow(
             listOf(

@@ -98,7 +98,7 @@ object DynAch {
 
 fun parseHexColor(s: String?): Long? = s?.removePrefix("#")?.takeIf { it.length == 6 }?.toLongOrNull(16)?.let { 0xFF000000 or it }
 
-data class LeaderRow(val rank: Int, val userId: String, val name: String, val avatarVersion: Int, val level: Int, val value: Long, val me: Boolean)
+data class LeaderRow(val rank: Int, val userId: String, val name: String, val avatarVersion: Int, val level: Int, val value: Long, val me: Boolean, val badge: String? = null)
 data class Leaderboard(val items: List<LeaderRow>, val me: LeaderRow?)
 
 data class SeasonChallenge(
@@ -150,6 +150,7 @@ data class Comment(
     val liked: Boolean,
     val gameId: Int = 0,
     val gameName: String? = null,
+    val badge: String? = null,
 )
 
 data class GameStats(val avgRating: Double?, val ratingCount: Int, val inLibrary: Int, val completed: Int)
@@ -178,6 +179,7 @@ data class Person(
     val completed: Int,
     val level: Int = 1,
     val creator: Boolean = false,
+    val badge: String? = null,
 )
 
 data class FriendsResult(val friends: List<Person>, val incoming: List<Person>, val outgoing: List<Person>)
@@ -196,6 +198,7 @@ data class PublicProfile(
     val featured: List<FeaturedAch> = emptyList(),
     val frame: String = "none",
     val background: String = "none",
+    val badge: String? = null,
 )
 
 // ---- 1.1: retro bingo, profile frames and backgrounds ----
@@ -205,7 +208,12 @@ data class Ttb(val main: Double?, val extra: Double?, val full: Double?)
 data class Forecast(val games: Int, val known: Int, val hours: Int)
 data class Compat(val hidden: Boolean, val percent: Int, val shared: Int, val lovedBoth: List<Int>, val theyHave: List<Int>, val iHave: List<Int>)
 data class CosItem(val code: String, val unlocked: Boolean, val kind: String?, val progress: Int, val goal: Int)
-data class Cosmetics(val frame: String, val background: String, val frames: List<CosItem>, val backgrounds: List<CosItem>)
+data class Cosmetics(val frame: String, val background: String, val frames: List<CosItem>, val backgrounds: List<CosItem>, val badge: String = "none", val badges: List<CosItem> = emptyList())
+data class SeasonQuest(val id: String, val title: String, val emoji: String, val goal: Int, val progress: Int, val done: Boolean, val xp: Int)
+data class SeasonSource(val kind: String, val count: Int, val xp: Int)
+data class SeasonReward(val level: Int, val kind: String, val code: String, val unlocked: Boolean)
+data class SeasonPass(val season: String, val endsAt: String, val xp: Int, val level: Int, val levelXp: Int, val maxLevel: Int, val sources: List<SeasonSource>, val quests: List<SeasonQuest>, val weekEndsAt: String, val rewards: List<SeasonReward>)
+data class SeasonTopRow(val rank: Int, val userId: String, val name: String, val avatarVersion: Int, val badge: String?, val xp: Int, val level: Int, val me: Boolean)
 
 data class BrowseResult(val items: List<Game>, val rawCount: Int)
 
@@ -257,6 +265,7 @@ data class FriendEvent(
     val rating: Int?,
     val favorite: Boolean,
     val at: String,
+    val badge: String? = null,
 )
 
 data class NewsItem(
@@ -457,6 +466,7 @@ private fun parsePerson(o: JSONObject): Person = Person(
     completed = o.optInt("completed", 0),
     level = o.optInt("level", 1),
     creator = o.optBoolean("creator", false),
+    badge = o.str("badge"),
 )
 
 private fun parseComment(c: JSONObject): Comment = Comment(
@@ -471,6 +481,7 @@ private fun parseComment(c: JSONObject): Comment = Comment(
     liked = c.optBoolean("liked", false),
     gameId = c.optInt("gameId", 0),
     gameName = c.str("gameName"),
+    badge = c.str("badge"),
 )
 
 private fun parseComments(o: JSONObject): List<Comment> =
@@ -1034,6 +1045,7 @@ class ApiClient(private val store: TokenStore) {
             featured = (o.optJSONArray("featured") ?: JSONArray()).objects().map { FeaturedAch(it.optString("code"), it.optInt("tier", 1)) },
             frame = o.optString("frame", "none").ifBlank { "none" },
             background = o.optString("background", "none").ifBlank { "none" },
+            badge = o.str("badge"),
         )
     }
 
@@ -1053,16 +1065,40 @@ class ApiClient(private val store: TokenStore) {
         fun items(a: JSONArray?) = (a ?: JSONArray()).objects().map {
             CosItem(it.optString("code"), it.optBoolean("unlocked"), it.str("kind"), it.optInt("progress"), it.optInt("goal"))
         }
-        return Cosmetics(o.optString("frame", "none"), o.optString("background", "none"), items(o.optJSONArray("frames")), items(o.optJSONArray("backgrounds")))
+        return Cosmetics(
+            o.optString("frame", "none"), o.optString("background", "none"), items(o.optJSONArray("frames")), items(o.optJSONArray("backgrounds")),
+            o.optString("badge", "none").ifBlank { "none" }, items(o.optJSONArray("badges")),
+        )
     }
 
     suspend fun cosmetics(): Cosmetics = io { parseCos(call("GET", "/v1/me/cosmetics")) }
-    suspend fun setCosmetics(frame: String?, background: String?): Pair<String, String> = io {
+    suspend fun setCosmetics(frame: String?, background: String?, badge: String? = null): Triple<String, String, String> = io {
         val b = JSONObject()
         frame?.let { b.put("frame", it) }
         background?.let { b.put("background", it) }
+        badge?.let { b.put("badge", it) }
         val o = call("PUT", "/v1/me/cosmetics", b)
-        o.optString("frame", "none") to o.optString("background", "none")
+        Triple(o.optString("frame", "none"), o.optString("background", "none"), o.optString("badge", "none").ifBlank { "none" })
+    }
+
+    suspend fun season(fresh: Boolean = false): SeasonPass = io {
+        val o = call("GET", "/v1/season" + if (fresh) "?fresh=1" else "")
+        val ru = java.util.Locale.getDefault().language == "ru"
+        SeasonPass(
+            o.optString("season"), o.optString("endsAt"), o.optInt("xp"), o.optInt("level"), o.optInt("levelXp", 250), o.optInt("maxLevel", 30),
+            (o.optJSONArray("sources") ?: JSONArray()).objects().map { SeasonSource(it.optString("kind"), it.optInt("count"), it.optInt("xp")) },
+            (o.optJSONArray("quests") ?: JSONArray()).objects().map {
+                SeasonQuest(it.optString("id"), it.optString(if (ru) "ru" else "en"), it.optString("emoji"), it.optInt("goal"), it.optInt("progress"), it.optBoolean("done"), it.optInt("xp"))
+            },
+            o.optString("weekEndsAt"),
+            (o.optJSONArray("rewards") ?: JSONArray()).objects().map { SeasonReward(it.optInt("level"), it.optString("kind"), it.optString("code"), it.optBoolean("unlocked")) },
+        )
+    }
+
+    suspend fun seasonTop(friends: Boolean): List<SeasonTopRow> = io {
+        (call("GET", "/v1/season/top?scope=" + if (friends) "friends" else "all").optJSONArray("items") ?: JSONArray()).objects().map {
+            SeasonTopRow(it.optInt("rank"), it.optString("userId"), it.optString("name"), it.optInt("avatarVersion"), it.str("badge"), it.optInt("xp"), it.optInt("level"), it.optBoolean("me"))
+        }
     }
     suspend fun ttb(gameId: Int): Ttb? = io {
         val t = call("GET", "/v1/games/$gameId/ttb").optJSONObject("ttb") ?: return@io null
@@ -1103,6 +1139,7 @@ class ApiClient(private val store: TokenStore) {
                 rating = it.intOrNull("rating"),
                 favorite = it.optBoolean("favorite"),
                 at = it.optString("at"),
+                badge = it.str("badge"),
             )
         }
     }
@@ -1275,7 +1312,7 @@ class ApiClient(private val store: TokenStore) {
     // ---- leaderboards, recommendations, seasonal challenges ----
     suspend fun leaderboard(metric: String, friends: Boolean): Leaderboard = io {
         val o = call("GET", "/v1/leaderboard?metric=$metric&scope=" + if (friends) "friends" else "all")
-        fun row(x: JSONObject) = LeaderRow(x.optInt("rank"), x.optString("userId"), x.optString("name"), x.optInt("avatarVersion"), x.optInt("level", 1), x.optLong("value"), x.optBoolean("me"))
+        fun row(x: JSONObject) = LeaderRow(x.optInt("rank"), x.optString("userId"), x.optString("name"), x.optInt("avatarVersion"), x.optInt("level", 1), x.optLong("value"), x.optBoolean("me"), x.str("badge"))
         Leaderboard((o.optJSONArray("items") ?: JSONArray()).objects().map { row(it) }, o.optJSONObject("me")?.let { row(it) })
     }
 
@@ -1332,7 +1369,7 @@ class ApiClient(private val store: TokenStore) {
     suspend fun quizGuess(gameId: Int): QuizState = io { parseQuiz(call("POST", "/v1/quiz/today/guess", JSONObject().put("gameId", gameId))) }
     suspend fun quizBoard(week: Boolean): Leaderboard = io {
         val o = call("GET", "/v1/quiz/leaderboard?period=" + if (week) "week" else "all")
-        fun row(x: JSONObject) = LeaderRow(x.optInt("rank"), x.optString("userId"), x.optString("name"), x.optInt("avatarVersion"), x.optInt("level", 1), x.optLong("value"), x.optBoolean("me"))
+        fun row(x: JSONObject) = LeaderRow(x.optInt("rank"), x.optString("userId"), x.optString("name"), x.optInt("avatarVersion"), x.optInt("level", 1), x.optLong("value"), x.optBoolean("me"), x.str("badge"))
         Leaderboard((o.optJSONArray("items") ?: JSONArray()).objects().map { row(it) }, o.optJSONObject("me")?.let { row(it) })
     }
 

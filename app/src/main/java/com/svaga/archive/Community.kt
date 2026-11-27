@@ -125,7 +125,10 @@ private fun BoardRow(r: LeaderRow, metric: String, onClick: () -> Unit) {
         Avatar(r.userId, r.avatarVersion, r.name, 42.dp, ring = r.rank <= 3)
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Body(r.name, weight = FontWeight.SemiBold, maxLines = 1, color = if (r.me) Cyan else Ink)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Body(r.name, Modifier.weight(1f, fill = false), weight = FontWeight.SemiBold, maxLines = 1, color = if (r.me) Cyan else Ink)
+                NickBadge(r.badge)
+            }
             Caption(stringResource(R.string.level_n, r.level) + " · " + levelName(r.level), maxLines = 1)
         }
         Text(

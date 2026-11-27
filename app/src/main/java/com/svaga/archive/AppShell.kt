@@ -162,6 +162,7 @@ object Routes {
     const val QUIZ = "quiz"
     const val BINGO = "bingo"
     const val COSMETICS = "cosmetics"
+    const val SEASON = "season"
     const val WHEEL = "wheel"
     const val LISTS = "lists"
     fun list(id: Long) = "list/$id"
@@ -210,6 +211,7 @@ fun MainNav(vm: AppViewModel) {
         composable(Routes.QUIZ) { QuizScreen(vm, nav) }
         composable(Routes.BINGO) { BingoScreen(vm, nav) }
         composable(Routes.COSMETICS) { CosmeticsScreen(vm, nav) }
+        composable(Routes.SEASON) { SeasonScreen(vm, nav) }
         composable(Routes.WHEEL) { WheelScreen(vm, nav) }
         composable(Routes.LISTS) { ListsScreen(vm, nav) }
         composable("list/{id}", arguments = listOf(navArgument("id") { type = NavType.LongType })) { e ->

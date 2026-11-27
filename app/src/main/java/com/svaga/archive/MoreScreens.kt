@@ -286,6 +286,7 @@ fun notificationText(n: NotificationItem): String {
         "comeback" -> stringResource(R.string.n_comeback, name, n.payload.optInt("days"))
         "bingo_line" -> stringResource(R.string.n_bingo_line, n.payload.optInt("lines"), n.payload.optInt("total", 12))
         "bingo_full" -> stringResource(R.string.n_bingo_full)
+        "season_level" -> stringResource(R.string.n_season_level, n.payload.optInt("level"))
         else -> n.kind
     }
 }
@@ -306,6 +307,7 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
                     "comment_like", "list_like" -> Icons.Filled.Favorite to Pink
                     "anniversary", "release", "comeback" -> Icons.Filled.DateRange to Amber
                     "bingo_line", "bingo_full" -> Icons.Filled.Star to Green
+                    "season_level" -> Icons.Filled.Star to Purple
                     else -> Icons.Filled.Person to Cyan
                 }
                 Row(
@@ -324,6 +326,7 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
                                     if (lid > 0) nav.go(Routes.list(lid))
                                 }
                                 "bingo_line", "bingo_full" -> nav.go(Routes.BINGO)
+                                "season_level" -> nav.go(Routes.SEASON)
                                 "comment_like", "release", "anniversary", "comeback" -> {
                                     val gid = n.payload.optInt("gameId", 0)
                                     if (gid > 0) nav.game(gid)
