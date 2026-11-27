@@ -1244,11 +1244,7 @@ class ApiClient(private val store: TokenStore) {
         call("DELETE", "/v1/admin/challenges/$id")
         Unit
     }
-}
 
-/** Games the server found when it refused to add a duplicate. */
-fun ApiException.duplicateMatches(): List<Game> =
-    (body.optJSONArray("matches") ?: JSONArray()).let { arr -> (0 until arr.length()).map { parseGame(arr.getJSONObject(it)) } 
     // ---- 1.7: on this day, daily quiz, game lists ----
     suspend fun onThisDay(): List<AnnivGame> = io {
         (call("GET", "/v1/onthisday").optJSONArray("items") ?: JSONArray()).objects().map {
@@ -1313,3 +1309,7 @@ fun ApiException.duplicateMatches(): List<Game> =
         o.optBoolean("liked") to o.optInt("likes")
     }
 }
+
+/** Games the server found when it refused to add a duplicate. */
+fun ApiException.duplicateMatches(): List<Game> =
+    (body.optJSONArray("matches") ?: JSONArray()).let { arr -> (0 until arr.length()).map { parseGame(arr.getJSONObject(it)) } }
