@@ -302,7 +302,7 @@ fun CosmeticsScreen(vm: AppViewModel, nav: Nav) {
                 val selected = if (tab == 0) c.frame == it.code else c.background == it.code
                 Column(
                     Modifier.clip(RoundedCornerShape(16.dp)).background(Panel)
-                        .border(if (selected) 2.dp else 1.dp, if (selected) Cyan else Stroke, RoundedCornerShape(16.dp))
+                        .border(if (selected) 2.dp else 1.dp, if (selected) Cyan else com.svaga.archive.Stroke, RoundedCornerShape(16.dp))
                         .clickable(enabled = it.unlocked && !selected) { if (tab == 0) f.equip(frame = it.code) else f.equip(background = it.code) }
                         .padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -416,7 +416,7 @@ fun BingoScreen(vm: AppViewModel, nav: Nav) {
                                         else -> Brush.linearGradient(listOf(Panel, Panel2))
                                     },
                                 )
-                                .border(1.dp, if (cell.done) Green.copy(alpha = 0.8f) else Stroke, RoundedCornerShape(12.dp))
+                                .border(1.dp, if (cell.done) Green.copy(alpha = 0.8f) else com.svaga.archive.Stroke, RoundedCornerShape(12.dp))
                                 .clickable { open = cell }
                                 .padding(3.dp),
                             contentAlignment = Alignment.Center,
