@@ -36,12 +36,24 @@ private val SeasonBrush get() = Brush.linearGradient(listOf(Color(0xFF3EE0FF), C
 private fun daysUntil(iso: String): Long? =
     runCatching { ChronoUnit.HOURS.between(Instant.now(), Instant.parse(iso)).coerceAtLeast(0) }.getOrNull()?.let { (it + 23) / 24 }
 
-/** "2026Q4" -> "IV · 2026" */
+/** "2026-winter" -> "Зима 2026/27", "2027-spring" -> "Весна 2027" */
+@Composable
 private fun seasonLabel(key: String): String {
-    val y = key.take(4)
-    val q = key.substringAfter('Q', "").toIntOrNull() ?: return key
-    return listOf("I", "II", "III", "IV").getOrElse(q - 1) { "$q" } + " · " + y
+    val y = key.take(4).toIntOrNull() ?: return key
+    return when (key.substringAfter('-')) {
+        "winter" -> stringResource(R.string.pass_winter, y, (y + 1) % 100)
+        "spring" -> stringResource(R.string.pass_spring, y)
+        "summer" -> stringResource(R.string.pass_summer, y)
+        "autumn" -> stringResource(R.string.pass_autumn, y)
+        else -> key
+    }
 }
+
+/** "1 декабря" */
+private fun dayMonth(iso: String): String = runCatching {
+    java.time.format.DateTimeFormatter.ofPattern("d MMMM", java.util.Locale.getDefault())
+        .format(Instant.parse(iso).atZone(java.time.ZoneId.of("Europe/Moscow")))
+}.getOrDefault("")
 
 @Composable
 fun SeasonTile(vm: AppViewModel, nav: Nav, modifier: Modifier = Modifier) {
@@ -54,13 +66,15 @@ fun SeasonTile(vm: AppViewModel, nav: Nav, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(46.dp).clip(CircleShape).background(SeasonBrush), contentAlignment = Alignment.Center) {
-            Text(if (s == null) "🎟️" else "${s.level}", color = Color(0xFF071018), fontSize = if (s == null) 22.sp else 20.sp, fontWeight = FontWeight.Black)
+            Text(if (s == null || !s.started) "🎟️" else "${s.level}", color = Color(0xFF071018), fontSize = if (s == null || !s.started) 22.sp else 20.sp, fontWeight = FontWeight.Black)
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Body(stringResource(R.string.pass_title), weight = FontWeight.Bold, maxLines = 1)
             if (s == null) {
                 Caption(stringResource(R.string.season_tile_new), maxLines = 2)
+            } else if (!s.started) {
+                Caption(stringResource(R.string.pass_starts, dayMonth(s.startsAt)) + (daysUntil(s.startsAt)?.let { " · " + stringResource(R.string.pass_in_days, it) } ?: ""), maxLines = 2)
             } else {
                 val left = s.quests.count { !it.done }
                 Caption(
@@ -82,14 +96,15 @@ fun SeasonScreen(vm: AppViewModel, nav: Nav) {
         f.loadSeason(fresh = true)
         if (f.cos == null) f.loadCosmetics()
     }
-    LaunchedEffect(friends) { f.loadSeasonTop(friends) }
+    LaunchedEffect(friends, f.season?.started) { if (f.season?.started == true) f.loadSeasonTop(friends) }
     val s = f.season
     Column(Modifier.fillMaxSize().background(Bg)) {
         TopBar(
             stringResource(R.string.pass_title), nav::back,
             subtitle = s?.let {
                 val d = daysUntil(it.endsAt)
-                stringResource(R.string.season_subtitle, seasonLabel(it.season)) + (d?.let { n -> " · " + stringResource(R.string.pass_days_left, n) } ?: "")
+                if (!it.started) seasonLabel(it.season)
+                else seasonLabel(it.season) + (d?.let { n -> " · " + stringResource(R.string.pass_days_left, n) } ?: "")
             },
         )
         when {
@@ -97,6 +112,19 @@ fun SeasonScreen(vm: AppViewModel, nav: Nav) {
             s == null -> { LoadingBox(); return@Column }
         }
         s!!
+        if (!s.started) {
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                SeasonSoon(s)
+                SectionHeader(stringResource(R.string.season_track), Modifier.padding(top = 8.dp))
+                RewardTrack(vm, s)
+                SectionHeader(stringResource(R.string.pass_how), Modifier.padding(top = 12.dp))
+                SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 14.dp) {
+                    Body(stringResource(R.string.pass_how_text), color = Muted, size = 14.sp)
+                }
+                Spacer(Modifier.height(BottomBarSpace))
+            }
+            return@Column
+        }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             SeasonHero(s)
             // ----- weekly quests -----
@@ -148,6 +176,26 @@ private val SOURCE_NAMES = mapOf(
     "rated" to ("⭐" to R.string.season_src_rated),
     "comments" to ("💬" to R.string.season_src_comments),
 )
+
+@Composable
+private fun SeasonSoon(s: SeasonPass) {
+    Column(
+        Modifier.fillMaxWidth().padding(16.dp).clip(RoundedCornerShape(24.dp))
+            .background(Brush.linearGradient(listOf(Color(0xFF13234A), Color(0xFF221548), Panel)))
+            .border(1.dp, Color(0xFF4F7CFF).copy(alpha = 0.5f), RoundedCornerShape(24.dp)).padding(22.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("🎟️", fontSize = 52.sp)
+        Spacer(Modifier.height(8.dp))
+        Text(stringResource(R.string.pass_starts, dayMonth(s.startsAt)), color = Ink, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+        daysUntil(s.startsAt)?.let {
+            Spacer(Modifier.height(4.dp))
+            Text(stringResource(R.string.pass_in_days, it), color = Cyan, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.height(8.dp))
+        Caption(stringResource(R.string.pass_soon_hint), maxLines = 3)
+    }
+}
 
 @Composable
 private fun SeasonHero(s: SeasonPass) {

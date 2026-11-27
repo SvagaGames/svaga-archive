@@ -896,4 +896,14 @@
     <string name="pass_title">Сезонный пропуск</string>
     <string name="pass_days_left">осталось %1$d дн.</string>
     <string name="version_build">%1$s (сборка %2$d)</string>
+    <string name="pass_winter">Зима %1$d/%2$02d</string>
+    <string name="pass_spring">Весна %1$d</string>
+    <string name="pass_summer">Лето %1$d</string>
+    <string name="pass_autumn">Осень %1$d</string>
+    <string name="pass_starts">Старт %1$s</string>
+    <string name="pass_in_days">через %1$d дн.</string>
+    <string name="pass_soon_hint">Опыт начнёт копиться с первого дня сезона. Награды остаются навсегда.</string>
+    <string name="pass_how">Как это работает</string>
+    <string name="pass_how_text">Каждый сезон длится три месяца: зима, весна, лето и осень. Опыт дают пройденные игры, викторина дня, бинго, достижения, оценки и отзывы, а каждый понедельник — три новых задания. Каждые 250 опыта — новый уровень, всего 30 уровней.</string>
+    <string name="n_season_start">Открыт новый сезонный пропуск — ждут новые задания!</string>
 </resources>

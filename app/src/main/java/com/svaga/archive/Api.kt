@@ -212,7 +212,7 @@ data class Cosmetics(val frame: String, val background: String, val frames: List
 data class SeasonQuest(val id: String, val title: String, val emoji: String, val goal: Int, val progress: Int, val done: Boolean, val xp: Int)
 data class SeasonSource(val kind: String, val count: Int, val xp: Int)
 data class SeasonReward(val level: Int, val kind: String, val code: String, val unlocked: Boolean)
-data class SeasonPass(val season: String, val endsAt: String, val xp: Int, val level: Int, val levelXp: Int, val maxLevel: Int, val sources: List<SeasonSource>, val quests: List<SeasonQuest>, val weekEndsAt: String, val rewards: List<SeasonReward>)
+data class SeasonPass(val started: Boolean, val startsAt: String, val season: String, val endsAt: String, val xp: Int, val level: Int, val levelXp: Int, val maxLevel: Int, val sources: List<SeasonSource>, val quests: List<SeasonQuest>, val weekEndsAt: String, val rewards: List<SeasonReward>)
 data class SeasonTopRow(val rank: Int, val userId: String, val name: String, val avatarVersion: Int, val badge: String?, val xp: Int, val level: Int, val me: Boolean)
 
 data class BrowseResult(val items: List<Game>, val rawCount: Int)
@@ -1085,7 +1085,7 @@ class ApiClient(private val store: TokenStore) {
         val o = call("GET", "/v1/season" + if (fresh) "?fresh=1" else "")
         val ru = java.util.Locale.getDefault().language == "ru"
         SeasonPass(
-            o.optString("season"), o.optString("endsAt"), o.optInt("xp"), o.optInt("level"), o.optInt("levelXp", 250), o.optInt("maxLevel", 30),
+            o.optBoolean("started", true), o.optString("startsAt"), o.optString("season"), o.optString("endsAt"), o.optInt("xp"), o.optInt("level"), o.optInt("levelXp", 250), o.optInt("maxLevel", 30),
             (o.optJSONArray("sources") ?: JSONArray()).objects().map { SeasonSource(it.optString("kind"), it.optInt("count"), it.optInt("xp")) },
             (o.optJSONArray("quests") ?: JSONArray()).objects().map {
                 SeasonQuest(it.optString("id"), it.optString(if (ru) "ru" else "en"), it.optString("emoji"), it.optInt("goal"), it.optInt("progress"), it.optBoolean("done"), it.optInt("xp"))

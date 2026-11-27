@@ -77,6 +77,7 @@ object Push {
             "bingo_line" -> ctx.getString(R.string.n_bingo_line, p.optInt("lines"), p.optInt("total", 12))
             "bingo_full" -> ctx.getString(R.string.n_bingo_full)
             "season_level" -> ctx.getString(R.string.n_season_level, p.optInt("level"))
+            "season_start" -> ctx.getString(R.string.n_season_start)
             else -> null
         }
     }
