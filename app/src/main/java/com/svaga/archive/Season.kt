@@ -49,6 +49,8 @@ private fun seasonLabel(key: String): String {
     }
 }
 
+private fun seasonEmoji(key: String) = when (key.substringAfter('-')) { "winter" -> "❄️"; "spring" -> "🌱"; "summer" -> "☀️"; else -> "🍂" }
+
 /** "1 декабря" */
 private fun dayMonth(iso: String): String = runCatching {
     java.time.format.DateTimeFormatter.ofPattern("d MMMM", java.util.Locale.getDefault())
@@ -66,7 +68,7 @@ fun SeasonTile(vm: AppViewModel, nav: Nav, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.size(46.dp).clip(CircleShape).background(SeasonBrush), contentAlignment = Alignment.Center) {
-            Text(if (s == null || !s.started) "🎟️" else "${s.level}", color = Color(0xFF071018), fontSize = if (s == null || !s.started) 22.sp else 20.sp, fontWeight = FontWeight.Black)
+            Text(if (s == null) "🎟️" else if (!s.started) seasonEmoji(s.season) else "${s.level}", color = Color(0xFF071018), fontSize = if (s == null || !s.started) 22.sp else 20.sp, fontWeight = FontWeight.Black)
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
@@ -74,7 +76,7 @@ fun SeasonTile(vm: AppViewModel, nav: Nav, modifier: Modifier = Modifier) {
             if (s == null) {
                 Caption(stringResource(R.string.season_tile_new), maxLines = 2)
             } else if (!s.started) {
-                Caption(stringResource(R.string.pass_starts, dayMonth(s.startsAt)) + (daysUntil(s.startsAt)?.let { " · " + stringResource(R.string.pass_in_days, it) } ?: ""), maxLines = 2)
+                Caption(stringResource(R.string.pass_number, s.number, seasonLabel(s.season)) + " · " + stringResource(R.string.pass_starts, dayMonth(s.startsAt)) + (daysUntil(s.startsAt)?.let { " · " + stringResource(R.string.pass_in_days, it) } ?: ""), maxLines = 2)
             } else {
                 val left = s.quests.count { !it.done }
                 Caption(
@@ -103,8 +105,8 @@ fun SeasonScreen(vm: AppViewModel, nav: Nav) {
             stringResource(R.string.pass_title), nav::back,
             subtitle = s?.let {
                 val d = daysUntil(it.endsAt)
-                if (!it.started) seasonLabel(it.season)
-                else seasonLabel(it.season) + (d?.let { n -> " · " + stringResource(R.string.pass_days_left, n) } ?: "")
+                if (!it.started) stringResource(R.string.pass_number, it.number, seasonLabel(it.season))
+                else stringResource(R.string.pass_number, it.number, seasonLabel(it.season)) + (d?.let { n -> " · " + stringResource(R.string.pass_days_left, n) } ?: "")
             },
         )
         when {
@@ -185,8 +187,10 @@ private fun SeasonSoon(s: SeasonPass) {
             .border(1.dp, Color(0xFF4F7CFF).copy(alpha = 0.5f), RoundedCornerShape(24.dp)).padding(22.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("🎟️", fontSize = 52.sp)
+        Text(seasonEmoji(s.season), fontSize = 52.sp)
         Spacer(Modifier.height(8.dp))
+        Text(stringResource(R.string.pass_number, s.number, seasonLabel(s.season)), color = Cyan, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(Modifier.height(4.dp))
         Text(stringResource(R.string.pass_starts, dayMonth(s.startsAt)), color = Ink, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         daysUntil(s.startsAt)?.let {
             Spacer(Modifier.height(4.dp))
