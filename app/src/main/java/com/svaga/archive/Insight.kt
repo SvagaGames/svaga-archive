@@ -172,6 +172,6 @@ fun BingoShareCard(b: Bingo, name: String) {
         }
         Spacer(Modifier.height(12.dp))
         Text(stringResource(R.string.bingo_share_stats, b.lines.size, b.linesTotal, b.cells.count { it.done } - 1), color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-        Text(stringResource(R.string.bingo_share_season, b.season), color = Color(0xFF9AA3B5), fontSize = 12.sp)
+        Text(seasonLabel(b.season), color = Color(0xFF9AA3B5), fontSize = 12.sp)
     }
 }

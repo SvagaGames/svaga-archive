@@ -433,11 +433,12 @@ fun BingoTile(vm: AppViewModel, nav: Nav, modifier: Modifier = Modifier) {
             Body(stringResource(R.string.bingo_title), weight = FontWeight.Bold, maxLines = 1)
             Caption(
                 if (b == null) stringResource(R.string.bingo_tile_new)
+                else if (!b.started) stringResource(R.string.pass_starts, dayMonth(b.startsAt)) + (daysUntil(b.startsAt)?.let { " · " + stringResource(R.string.pass_in_days, it) } ?: "")
                 else stringResource(R.string.bingo_tile, b.cells.count { it.done } - 1, 24, b.lines.size, b.linesTotal),
                 maxLines = 2,
             )
         }
-        if (b != null) {
+        if (b != null && b.started) {
             Box(Modifier.size(46.dp)) { MiniBingo(b) }
         }
     }
@@ -464,7 +465,7 @@ fun BingoScreen(vm: AppViewModel, nav: Nav) {
     var share by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().background(Bg)) {
         TopBar(stringResource(R.string.bingo_title), nav::back, subtitle = stringResource(R.string.bingo_subtitle)) {
-            if (f.bingo != null) IconBtn(Icons.Filled.Share, { share = true })
+            if (f.bingo?.started == true) IconBtn(Icons.Filled.Share, { share = true })
         }
         f.bingo?.let { cur ->
             if (share) {
@@ -478,6 +479,26 @@ fun BingoScreen(vm: AppViewModel, nav: Nav) {
             b == null -> { LoadingBox(); return@Column }
         }
         b!!
+        if (!b.started) {
+            Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                SvCard(Modifier.fillMaxWidth(), padding = 22.dp, border = Green.copy(alpha = 0.5f)) {
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("🎱", fontSize = 52.sp)
+                        Spacer(Modifier.height(8.dp))
+                        Text(stringResource(R.string.pass_starts, dayMonth(b.startsAt)), color = Ink, fontSize = 22.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                        daysUntil(b.startsAt)?.let {
+                            Spacer(Modifier.height(4.dp))
+                            Text(stringResource(R.string.pass_in_days, it), color = Green, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Caption(stringResource(R.string.bingo_soon_hint), maxLines = Int.MAX_VALUE)
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
+                Caption(stringResource(R.string.bingo_rules), Modifier.padding(horizontal = 4.dp), maxLines = Int.MAX_VALUE)
+            }
+            return@Column
+        }
         val inLine = b.lines.flatMap { LINE_CELLS.getOrElse(it) { emptyList() } }.toSet()
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             val days = runCatching { ChronoUnit.DAYS.between(Instant.now(), Instant.parse(b.endsAt)).coerceAtLeast(0) }.getOrNull()
@@ -515,7 +536,7 @@ fun BingoScreen(vm: AppViewModel, nav: Nav) {
                     }
                 }
             }
-            Caption(stringResource(R.string.bingo_rules), Modifier.padding(horizontal = 20.dp, vertical = 4.dp))
+            Caption(stringResource(R.string.bingo_rules), Modifier.padding(horizontal = 20.dp, vertical = 4.dp), maxLines = Int.MAX_VALUE)
             Spacer(Modifier.height(8.dp))
             b.cells.filter { !it.done }.forEach { c ->
                 Row(Modifier.fillMaxWidth().clickable { open = c }.padding(horizontal = 20.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -534,7 +555,7 @@ fun BingoScreen(vm: AppViewModel, nav: Nav) {
                 Spacer(Modifier.height(8.dp))
                 H2(c.title)
                 Spacer(Modifier.height(8.dp))
-                if (c.id == "free") Caption(stringResource(R.string.bingo_free_hint))
+                if (c.id == "free") Caption(stringResource(R.string.bingo_free_hint), maxLines = Int.MAX_VALUE)
                 else if (c.done) Body(stringResource(R.string.bingo_done), color = Green, weight = FontWeight.Bold)
                 else {
                     Caption(stringResource(R.string.bingo_progress, c.progress, c.goal))

@@ -241,7 +241,7 @@ fun SvagaIdSection(vm: AppViewModel) {
     val ctx = LocalContext.current
     LaunchedEffect(Unit) { vm.loadIdentities() }
     val ids = vm.identities ?: return
-    if (ids.available.isEmpty() && ids.items.isEmpty()) return
+    if (ids.available.isEmpty() && ids.items.isEmpty() && ids.paused.isEmpty()) return
     Label(stringResource(R.string.svaga_id_title))
     SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
         Caption(stringResource(R.string.svaga_id_hint), Modifier.padding(start = 16.dp, end = 16.dp, top = 14.dp), maxLines = 4)
@@ -259,6 +259,10 @@ fun SvagaIdSection(vm: AppViewModel) {
                     else SvChip(stringResource(R.string.svaga_id_link), false, { vm.linkIdentity(ctx, p) })
                 },
             )
+        }
+        ids.paused.filter { p -> ids.items.none { it.provider == p } }.forEach { p ->
+            Divider1()
+            ProviderOffNote(p, Modifier.padding(16.dp))
         }
     }
 }

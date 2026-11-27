@@ -203,7 +203,7 @@ data class PublicProfile(
 
 // ---- 1.1: retro bingo, profile frames and backgrounds ----
 data class BingoCell(val id: String, val title: String, val emoji: String, val goal: Int, val progress: Int, val done: Boolean)
-data class Bingo(val season: String, val endsAt: String, val cells: List<BingoCell>, val lines: List<Int>, val linesTotal: Int, val full: Boolean)
+data class Bingo(val started: Boolean, val startsAt: String, val season: String, val endsAt: String, val cells: List<BingoCell>, val lines: List<Int>, val linesTotal: Int, val full: Boolean)
 data class Ttb(val main: Double?, val extra: Double?, val full: Double?)
 data class Forecast(val games: Int, val known: Int, val hours: Int)
 data class Compat(val hidden: Boolean, val percent: Int, val shared: Int, val lovedBoth: List<Int>, val theyHave: List<Int>, val iHave: List<Int>)
@@ -232,7 +232,7 @@ data class RuTranslation(
 
 data class IdentityItem(val provider: String, val name: String?, val email: String?)
 
-data class IdentitiesResult(val hasPassword: Boolean, val available: List<String>, val items: List<IdentityItem>)
+data class IdentitiesResult(val hasPassword: Boolean, val available: List<String>, val items: List<IdentityItem>, val paused: List<String> = emptyList())
 
 data class AdminUser(
     val id: String,
@@ -635,9 +635,11 @@ class ApiClient(private val store: TokenStore) {
     }
 
     // ---- Svaga ID (Google / Yandex / VK through the system browser) ----
-    suspend fun oauthProviders(): List<String> = io {
-        val arr = execute("GET", "/v1/auth/providers", null, false).optJSONArray("providers")
-        List(arr?.length() ?: 0) { arr!!.getString(it) }
+    /** Enabled providers and the ones shown with a "not enabled yet" note. */
+    suspend fun oauthProviders(): Pair<List<String>, List<String>> = io {
+        val o = execute("GET", "/v1/auth/providers", null, false)
+        fun list(k: String) = (o.optJSONArray(k) ?: JSONArray()).let { a -> List(a.length()) { a.getString(it) } }
+        list("providers") to list("paused")
     }
 
     fun oauthStartUrl(provider: String) = "$BASE_URL/v1/auth/oauth/$provider/start"
@@ -669,6 +671,7 @@ class ApiClient(private val store: TokenStore) {
         IdentitiesResult(
             hasPassword = o.optBoolean("hasPassword", true),
             available = List(av?.length() ?: 0) { av!!.getString(it) },
+            paused = (o.optJSONArray("paused") ?: JSONArray()).let { a -> List(a.length()) { a.getString(it) } },
             items = List(items?.length() ?: 0) {
                 val r = items!!.getJSONObject(it)
                 IdentityItem(r.getString("provider"), r.str("name"), r.str("email"))
@@ -1053,7 +1056,7 @@ class ApiClient(private val store: TokenStore) {
         val o = call("GET", "/v1/bingo")
         val ru = java.util.Locale.getDefault().language == "ru"
         Bingo(
-            o.optString("season"), o.optString("endsAt"),
+            o.optBoolean("started", true), o.optString("startsAt"), o.optString("season"), o.optString("endsAt"),
             (o.optJSONArray("cells") ?: JSONArray()).objects().map {
                 BingoCell(it.optString("id"), it.optString(if (ru) "ru" else "en"), it.optString("emoji"), it.optInt("goal"), it.optInt("progress"), it.optBoolean("done"))
             },

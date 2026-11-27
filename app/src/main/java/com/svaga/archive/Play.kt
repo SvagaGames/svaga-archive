@@ -355,7 +355,7 @@ fun QuizScreen(vm: AppViewModel, nav: Nav) {
             )
             if (hints.isNotEmpty()) {
                 SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
-                    Caption(stringResource(R.string.quiz_hints))
+                    Caption(stringResource(R.string.quiz_hints), maxLines = Int.MAX_VALUE)
                     hints.forEach { (k, v) ->
                         Row(Modifier.padding(top = 4.dp)) {
                             Body("$k: ", color = Muted, size = 14.sp)
@@ -393,7 +393,7 @@ fun QuizScreen(vm: AppViewModel, nav: Nav) {
                         results = emptyList()
                     }, subtitle = listOfNotNull(g.year?.toString(), g.platforms.firstOrNull()).joinToString(" · "))
                 }
-                if (query.isBlank()) Caption(stringResource(R.string.quiz_rules), Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+                if (query.isBlank()) Caption(stringResource(R.string.quiz_rules), Modifier.padding(horizontal = 20.dp, vertical = 8.dp), maxLines = Int.MAX_VALUE)
             }
             Spacer(Modifier.height(24.dp))
         }
@@ -610,7 +610,7 @@ fun ListEditDialog(initial: GameList?, close: () -> Unit, save: (String, String?
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Body(stringResource(R.string.list_public), weight = FontWeight.SemiBold)
-                    Caption(stringResource(R.string.list_public_hint))
+                    Caption(stringResource(R.string.list_public_hint), maxLines = Int.MAX_VALUE)
                 }
                 Switch(public, { public = it }, colors = SwitchDefaults.colors(checkedTrackColor = Cyan))
             }
@@ -758,7 +758,7 @@ fun AddToListDialog(vm: AppViewModel, gameId: Int, close: () -> Unit) {
             val lists = play.forGame
             when {
                 lists == null -> LoadingBox(Modifier.height(120.dp))
-                lists.isEmpty() -> Caption(stringResource(R.string.lists_mine_hint), Modifier.padding(vertical = 8.dp))
+                lists.isEmpty() -> Caption(stringResource(R.string.lists_mine_hint), Modifier.padding(vertical = 8.dp), maxLines = Int.MAX_VALUE)
                 else -> LazyColumn(Modifier.weight(1f, false)) {
                     items(lists, key = { it.id }) { l ->
                         Row(Modifier.fillMaxWidth().clickable { play.toggleInList(l, gameId) }.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {

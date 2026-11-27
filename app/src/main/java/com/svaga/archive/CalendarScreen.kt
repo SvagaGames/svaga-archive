@@ -47,7 +47,7 @@ fun CalendarScreen(vm: AppViewModel, nav: Nav) {
         item {
             Column(Modifier.padding(start = 20.dp, end = 16.dp, top = 14.dp, bottom = 8.dp)) {
                 H1(stringResource(R.string.calendar_title))
-                Caption(stringResource(R.string.calendar_hint))
+                Caption(stringResource(R.string.calendar_hint), maxLines = Int.MAX_VALUE)
             }
         }
         item {

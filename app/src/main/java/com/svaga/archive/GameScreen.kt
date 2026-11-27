@@ -363,7 +363,7 @@ private fun StatusSheet(current: String?, onPick: (String?) -> Unit, onDismiss: 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state, containerColor = Bg) {
         Column(Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
             H2(stringResource(R.string.section_status), Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-            Caption(stringResource(R.string.status_hint), Modifier.padding(horizontal = 20.dp))
+            Caption(stringResource(R.string.status_hint), Modifier.padding(horizontal = 20.dp), maxLines = Int.MAX_VALUE)
             Spacer(Modifier.height(8.dp))
             STATUSES.forEach { s ->
                 Row(

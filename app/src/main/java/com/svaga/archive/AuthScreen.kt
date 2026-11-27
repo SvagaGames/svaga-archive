@@ -144,7 +144,7 @@ fun providerTitle(provider: String): String = when (provider) {
 fun SocialLoginButtons(vm: AppViewModel) {
     val ctx = LocalContext.current
     LaunchedEffect(Unit) { vm.loadProviders() }
-    if (vm.providers.isEmpty()) return
+    if (vm.providers.isEmpty() && vm.pausedProviders.isEmpty()) return
     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f).height(1.dp).background(Stroke))
@@ -155,5 +155,14 @@ fun SocialLoginButtons(vm: AppViewModel) {
         vm.providers.forEach { p ->
             SvButton(providerTitle(p), { vm.startOauth(ctx, p) }, Modifier.fillMaxWidth().padding(bottom = 10.dp), kind = BtnKind.Secondary)
         }
+        vm.pausedProviders.forEach { p -> ProviderOffNote(p, Modifier.padding(bottom = 10.dp)) }
+    }
+}
+
+/** "Вход через Яндекс ещё не включён на сервере." — like the Steam import note. */
+@Composable
+fun ProviderOffNote(provider: String, modifier: Modifier = Modifier) {
+    SvCard(modifier.fillMaxWidth(), border = Amber.copy(alpha = 0.6f), padding = 14.dp) {
+        Body(stringResource(R.string.provider_off, providerTitle(provider)), color = Amber, size = 14.sp)
     }
 }

@@ -307,7 +307,7 @@ fun SteamImportScreen(vm: AppViewModel, nav: Nav) {
                 Switch(playtime, { playtime = it }, colors = SwitchDefaults.colors(checkedTrackColor = Cyan, checkedThumbColor = Color.White))
             }
             Spacer(Modifier.height(8.dp))
-            Caption(stringResource(R.string.steam_private_hint))
+            Caption(stringResource(R.string.steam_private_hint), maxLines = Int.MAX_VALUE)
             Spacer(Modifier.height(16.dp))
             SvButton(stringResource(R.string.steam_import), { ex.importSteam(profile, playtime) }, Modifier.fillMaxWidth(), enabled = profile.isNotBlank() && st?.configured != false, busy = ex.steamBusy)
             Spacer(Modifier.height(8.dp))

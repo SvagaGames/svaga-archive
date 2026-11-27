@@ -905,4 +905,6 @@
     <string name="pass_how_text">Each season lasts three months: winter, spring, summer and autumn. Earn XP for completed games, the daily quiz, bingo, achievements, ratings and reviews, plus three new quests every Monday. Every 250 XP is a new level, 30 levels in total.</string>
     <string name="n_season_start">The new season pass is open — new quests are waiting!</string>
     <string name="pass_number">Season %1$d · %2$s</string>
+    <string name="provider_off">Sign-in with %1$s is not enabled on the server yet.</string>
+    <string name="bingo_soon_hint">The first card opens with Season 1 — Winter 2026/27. Only what you do from that day counts.</string>
 </resources>

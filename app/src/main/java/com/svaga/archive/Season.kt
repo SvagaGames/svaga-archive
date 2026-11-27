@@ -33,12 +33,12 @@ import java.time.temporal.ChronoUnit
 
 private val SeasonBrush get() = Brush.linearGradient(listOf(Color(0xFF3EE0FF), Color(0xFF4F7CFF), Color(0xFFB98BFF)))
 
-private fun daysUntil(iso: String): Long? =
+internal fun daysUntil(iso: String): Long? =
     runCatching { ChronoUnit.HOURS.between(Instant.now(), Instant.parse(iso)).coerceAtLeast(0) }.getOrNull()?.let { (it + 23) / 24 }
 
 /** "2026-winter" -> "Зима 2026/27", "2027-spring" -> "Весна 2027" */
 @Composable
-private fun seasonLabel(key: String): String {
+internal fun seasonLabel(key: String): String {
     val y = key.take(4).toIntOrNull() ?: return key
     return when (key.substringAfter('-')) {
         "winter" -> stringResource(R.string.pass_winter, y, (y + 1) % 100)
@@ -52,7 +52,7 @@ private fun seasonLabel(key: String): String {
 private fun seasonEmoji(key: String) = when (key.substringAfter('-')) { "winter" -> "❄️"; "spring" -> "🌱"; "summer" -> "☀️"; else -> "🍂" }
 
 /** "1 декабря" */
-private fun dayMonth(iso: String): String = runCatching {
+internal fun dayMonth(iso: String): String = runCatching {
     java.time.format.DateTimeFormatter.ofPattern("d MMMM", java.util.Locale.getDefault())
         .format(Instant.parse(iso).atZone(java.time.ZoneId.of("Europe/Moscow")))
 }.getOrDefault("")

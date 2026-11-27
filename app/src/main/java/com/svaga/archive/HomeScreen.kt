@@ -139,7 +139,7 @@ fun HomeScreen(vm: AppViewModel, nav: Nav, openLibrary: (String) -> Unit, openCa
                     Spacer(Modifier.width(12.dp))
                     Column(Modifier.weight(1f)) {
                         Body(stringResource(R.string.add_game_missing), weight = FontWeight.SemiBold)
-                        Caption(stringResource(R.string.add_game_hint))
+                        Caption(stringResource(R.string.add_game_hint), maxLines = Int.MAX_VALUE)
                     }
                 }
             }

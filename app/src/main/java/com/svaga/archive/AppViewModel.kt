@@ -391,12 +391,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     // ---------- Svaga ID ----------
     var providers by mutableStateOf<List<String>>(emptyList())
         private set
+    var pausedProviders by mutableStateOf<List<String>>(emptyList())
+        private set
     var identities by mutableStateOf<IdentitiesResult?>(null)
         private set
 
     fun loadProviders() {
         viewModelScope.launch {
-            try { providers = api.oauthProviders() } catch (e: CancellationException) { throw e } catch (e: Exception) { /* offline: buttons stay hidden */ }
+            try { api.oauthProviders().let { (on, off) -> providers = on; pausedProviders = off } } catch (e: CancellationException) { throw e } catch (e: Exception) { /* offline: buttons stay hidden */ }
         }
     }
 
