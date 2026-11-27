@@ -254,8 +254,9 @@ fun MainScreen(vm: AppViewModel, nav: Nav) {
     }
 }
 
-/** Space the floating bottom bar takes; scrolling content adds it at the end. */
-val BottomBarSpace = 104.dp
+/** Space the floating bottom bar takes (plus the system navigation bar); scrolling content adds it at the end. */
+val BottomBarSpace: androidx.compose.ui.unit.Dp
+    @Composable get() = 124.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
 @Composable
 fun BottomBar(vm: AppViewModel, tab: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {

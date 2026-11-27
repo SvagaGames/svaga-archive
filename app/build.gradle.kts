@@ -30,7 +30,7 @@ android {
         applicationId = "com.svaga.archive"
         minSdk = 26
         targetSdk = 36
-        versionCode = 35
+        versionCode = 36
         versionName = "1.0"
     }
 
