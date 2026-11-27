@@ -77,7 +77,7 @@ private val LOOKS = mapOf(
  */
 @Composable
 fun AchievementArt(code: String, tier: Int, unlocked: Boolean, modifier: Modifier = Modifier, size: Dp = 112.dp, hidden: Boolean = false) {
-    val look = LOOKS[code] ?: AchLook("❓", 0xFF5B6375, 0xFF262B36)
+    val look = LOOKS[code] ?: DynAch.map[code]?.let { AchLook(it.emoji, it.a, it.b) } ?: AchLook("❓", 0xFF5B6375, 0xFF262B36)
     val rim = if (unlocked) tierColor(tier.coerceAtLeast(1)) else Faint
     val shell = Panel2
     Box(modifier.size(width = size, height = size * 1.12f)) {

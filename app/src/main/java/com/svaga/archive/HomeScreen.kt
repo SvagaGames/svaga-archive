@@ -56,6 +56,8 @@ fun HomeScreen(vm: AppViewModel, nav: Nav, openLibrary: (String) -> Unit, openCa
     LaunchedEffect(Unit) {
         vm.loadHomeRows()
         if (vm.upcoming.isEmpty()) vm.loadUpcoming()
+        vm.extras.loadSeasons()
+        if (vm.extras.recs.isEmpty()) vm.extras.loadRecs()
     }
     val playing = vm.library.values.filter { it.status == "playing" }.sortedByDescending { it.updatedAt }.mapNotNull { vm.gamesCache[it.gameId] }
     val today = LocalDate.now()
@@ -93,6 +95,7 @@ fun HomeScreen(vm: AppViewModel, nav: Nav, openLibrary: (String) -> Unit, openCa
                 }
             }
         }
+        item { SeasonCards(vm, nav) }
         if (playing.isNotEmpty()) {
             item {
                 GameShelf(stringResource(R.string.home_playing), playing, vm, nav::game, Modifier.padding(top = 8.dp), onMore = { openLibrary("playing") })
@@ -104,6 +107,12 @@ fun HomeScreen(vm: AppViewModel, nav: Nav, openLibrary: (String) -> Unit, openCa
                 LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(soon, key = { it.id }) { g -> ReleaseCard(g, vm.library[g.id]?.status) { nav.game(g.id) } }
                 }
+            }
+        }
+        val recs = vm.extras.recs.filter { vm.library[it.id]?.status == null }
+        if (recs.isNotEmpty()) {
+            item(key = "recs") {
+                GameShelf(stringResource(R.string.recs_title), recs, vm, nav::game, Modifier.padding(top = 8.dp))
             }
         }
         listOf("popular", "svaga", "new", "top", "retro").forEach { key ->

@@ -248,6 +248,8 @@ fun ProfileScreen(vm: AppViewModel, nav: Nav, standalone: Boolean, openLibrary: 
 
         Spacer(Modifier.height(12.dp))
         SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
+            SettingRow(Icons.Filled.Star, stringResource(R.string.board_title), onClick = { nav.go(Routes.LEADERBOARD) })
+            Divider1()
             SettingRow(Icons.Filled.Home, stringResource(R.string.collection_mine), onClick = { nav.go(Routes.COLLECTION) })
             Divider1()
             SettingRow(Icons.Filled.Favorite, stringResource(R.string.people_friends), value = vm.friends.friends.size.toString(), onClick = { nav.go(Routes.PEOPLE) })

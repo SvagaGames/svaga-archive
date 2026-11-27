@@ -30,8 +30,8 @@ android {
         applicationId = "com.svaga.archive"
         minSdk = 26
         targetSdk = 36
-        versionCode = 24
-        versionName = "1.3.0"
+        versionCode = 25
+        versionName = "1.4.0"
     }
 
     // One code base, four shops. Google Play does not allow an app to update itself, so the APK self-update lives only
@@ -99,6 +99,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("androidx.glance:glance-appwidget:1.1.1")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
     "rustoreImplementation"("ru.rustore.sdk:appupdate:10.5.2")
 }

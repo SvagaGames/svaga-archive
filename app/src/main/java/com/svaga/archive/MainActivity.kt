@@ -36,6 +36,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         CrashLog.install(applicationContext)
         if (savedInstanceState == null) vm.handleDeepLink(intent?.data)
+        Push.schedule(applicationContext)
+        if (android.os.Build.VERSION.SDK_INT >= 33 && !Push.canPost(this) && Push.enabled(this)) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 7001)
+        }
         val updater = createUpdater(this)
         UpdateState.updater = updater
         if (updater.canCheck) updater.check(manual = false)

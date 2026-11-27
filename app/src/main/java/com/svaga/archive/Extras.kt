@@ -98,6 +98,54 @@ class Extras(private val vm: AppViewModel) {
         }
     }
 
+    // ---------- leaderboards, recommendations, seasons, challenge editor ----------
+    var board by mutableStateOf<Leaderboard?>(null)
+        private set
+    var boardError by mutableStateOf<Int?>(null)
+        private set
+    var recs by mutableStateOf<List<Game>>(emptyList())
+        private set
+    var seasons by mutableStateOf<List<SeasonChallenge>>(emptyList())
+        private set
+    var challenges by mutableStateOf<List<AdminChallenge>>(emptyList())
+        private set
+    var challengeBusy by mutableStateOf(false)
+        private set
+    var challengeError by mutableStateOf<Int?>(null)
+        private set
+
+    fun loadBoard(metric: String, friends: Boolean) = run({ boardError = it }) {
+        board = null
+        board = api.leaderboard(metric, friends)
+        boardError = null
+    }
+
+    fun loadRecs() = run {
+        val list = api.recommendations()
+        list.forEach { vm.gamesCache[it.id] = it }
+        recs = list
+    }
+
+    fun loadSeasons() = run { seasons = api.seasonChallenges() }
+
+    fun loadChallenges() = run({ challengeError = it }) { challenges = api.adminChallenges() }
+
+    fun saveChallenge(id: Int?, body: org.json.JSONObject, onDone: () -> Unit) {
+        challengeBusy = true
+        challengeError = null
+        run({ challengeError = it; challengeBusy = false }) {
+            api.saveChallenge(id, body)
+            challenges = api.adminChallenges()
+            challengeBusy = false
+            onDone()
+        }
+    }
+
+    fun deleteChallenge(id: Int) = run {
+        api.deleteChallenge(id)
+        challenges = api.adminChallenges()
+    }
+
     // ---------- Steam ----------
     var steam by mutableStateOf<SteamStatus?>(null)
         private set
@@ -192,6 +240,10 @@ class Extras(private val vm: AppViewModel) {
         raImport = null
         userRa.clear()
         emulator.clear()
+        board = null
+        recs = emptyList()
+        seasons = emptyList()
+        challenges = emptyList()
         ctx.getSharedPreferences(WIDGET_PREFS, Context.MODE_PRIVATE).edit().clear().apply()
         vm.viewModelScope.launch { runCatching { NowPlayingWidget().updateAll(ctx) } }
     }

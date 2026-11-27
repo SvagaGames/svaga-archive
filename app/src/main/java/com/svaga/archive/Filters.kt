@@ -136,15 +136,23 @@ private val LEVEL_NAMES = listOf(
 
 private val TIER_NAMES = listOf(R.string.tier_1, R.string.tier_2, R.string.tier_3, R.string.tier_4, R.string.tier_5)
 
-val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "secret")
+val ACH_CATEGORIES = listOf("collector", "conqueror", "explorer", "friendship", "social", "popular", "activity", "expert", "player", "planner", "favorite", "quitter", "masterpiece", "harsh", "chronicler", "marathon", "emulator", "shelf", "cib", "oldschool", "archaeologist", "mobile", "archivist", "cartographer", "localizer", "generous", "veteran", "retrohunter", "theme", "season", "secret")
 
 @Composable
-fun achTitle(code: String): String = ACH_TITLE[code]?.let { stringResource(it) } ?: code
+fun achTitle(code: String): String = when (code) {
+    "theme" -> stringResource(R.string.ach_cat_theme)
+    "season" -> stringResource(R.string.ach_cat_season)
+    else -> ACH_TITLE[code]?.let { stringResource(it) } ?: DynAch.map[code]?.title ?: code
+}
 
 /** Text for the tier the player is working on (or for the last one when everything is done). */
 @Composable
 fun achDescription(code: String, tier: Int, goal: Int): String {
     if (code == "explorer") return stringResource(EXPLORER_DESC[(tier - 1).coerceIn(0, 4)])
+    DynAch.map[code]?.let { d ->
+        val text = d.description ?: return stringResource(R.string.ach_dyn_default, goal)
+        return runCatching { String.format(text, goal) }.getOrDefault(text)
+    }
     val res = ACH_DESC[code] ?: return ""
     return if (code in setOf("pioneer", "founder", "svaga_explorer", "supporter", "anniversary", "full_house", "perfectionist", "ra_link", "steam_link", "svaga_fan", "hidden_gem")) stringResource(res)
     else stringResource(res, goal)

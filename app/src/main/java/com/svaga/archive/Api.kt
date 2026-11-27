@@ -77,6 +77,37 @@ data class AchItem(
     val unlockedAt: String?,
     val rarity: Double,
     val featured: Boolean,
+    /** Themed and seasonal achievements come with their own title and look from the server. */
+    val title: String? = null,
+    val description: String? = null,
+    val emoji: String? = null,
+    val colors: List<Long> = emptyList(),
+    val endsAt: String? = null,
+)
+
+/** Titles and looks of server-defined achievements (themes, seasons), by code. */
+object DynAch {
+    data class Look(val title: String, val description: String?, val emoji: String, val a: Long, val b: Long)
+    val map = java.util.concurrent.ConcurrentHashMap<String, Look>()
+    fun put(code: String, title: String?, description: String?, emoji: String?, colors: List<Long>) {
+        if (title.isNullOrBlank()) return
+        map[code] = Look(title, description, emoji ?: "🎮", colors.getOrElse(0) { 0xFF3EE0FF }, colors.getOrElse(1) { 0xFF4F7CFF })
+    }
+}
+
+fun parseHexColor(s: String?): Long? = s?.removePrefix("#")?.takeIf { it.length == 6 }?.toLongOrNull(16)?.let { 0xFF000000 or it }
+
+data class LeaderRow(val rank: Int, val userId: String, val name: String, val avatarVersion: Int, val level: Int, val value: Long, val me: Boolean)
+data class Leaderboard(val items: List<LeaderRow>, val me: LeaderRow?)
+
+data class SeasonChallenge(
+    val id: Int, val code: String, val title: String, val description: String?, val emoji: String, val colors: List<Long>,
+    val progress: Int, val goal: Int, val endsAt: String?, val sp: Int,
+)
+
+data class AdminChallenge(
+    val id: Int, val kind: String, val title: String, val description: String?, val emoji: String, val metric: String,
+    val pattern: String?, val gameIds: List<Int>, val goals: List<Int>, val sp: Int, val endsAt: String?, val active: Boolean, val builtin: Boolean,
 )
 
 data class AchievementsResult(
@@ -449,7 +480,12 @@ private fun parseAchItem(a: JSONObject): AchItem = AchItem(
     unlockedAt = a.str("unlockedAt"),
     rarity = a.optDouble("rarity", 0.0).let { if (it.isNaN()) 0.0 else it },
     featured = a.optBoolean("featured", false),
-)
+    title = a.str("title"),
+    description = a.str("description"),
+    emoji = a.str("emoji"),
+    colors = (a.optJSONArray("colors") ?: JSONArray()).strings().mapNotNull { parseHexColor(it) },
+    endsAt = a.optJSONObject("season")?.str("endsAt"),
+).also { DynAch.put(it.code, it.title, it.description, it.emoji, it.colors) }
 
 private fun tzMinutes(): Int = TimeZone.getDefault().getOffset(System.currentTimeMillis()) / 60000
 
@@ -1132,6 +1168,43 @@ class ApiClient(private val store: TokenStore) {
 
     /** A separate session for Svaga Emulator (it signs in through this app). */
     suspend fun handoff(): JSONObject = io { call("POST", "/v1/auth/handoff") }
+
+    // ---- leaderboards, recommendations, seasonal challenges ----
+    suspend fun leaderboard(metric: String, friends: Boolean): Leaderboard = io {
+        val o = call("GET", "/v1/leaderboard?metric=$metric&scope=" + if (friends) "friends" else "all")
+        fun row(x: JSONObject) = LeaderRow(x.optInt("rank"), x.optString("userId"), x.optString("name"), x.optInt("avatarVersion"), x.optInt("level", 1), x.optLong("value"), x.optBoolean("me"))
+        Leaderboard((o.optJSONArray("items") ?: JSONArray()).objects().map { row(it) }, o.optJSONObject("me")?.let { row(it) })
+    }
+
+    suspend fun recommendations(): List<Game> = io { parseGames(call("GET", "/v1/me/recommendations")) }
+
+    suspend fun seasonChallenges(): List<SeasonChallenge> = io {
+        (call("GET", "/v1/challenges/season").optJSONArray("items") ?: JSONArray()).objects().map {
+            val colors = (it.optJSONArray("colors") ?: JSONArray()).strings().mapNotNull { c -> parseHexColor(c) }
+            DynAch.put(it.optString("code"), it.optString("title"), it.str("description"), it.str("emoji"), colors)
+            SeasonChallenge(it.optInt("id"), it.optString("code"), it.optString("title"), it.str("description"), it.optString("emoji", "🎮"),
+                colors, it.optInt("progress"), it.optInt("goal", 1), it.str("endsAt"), it.optInt("sp"))
+        }
+    }
+
+    private fun parseAdminChallenge(o: JSONObject) = AdminChallenge(
+        o.optInt("id"), o.optString("kind"), o.optString("title"), o.str("description"), o.optString("emoji", "🎮"), o.optString("metric"),
+        o.str("pattern"), (o.optJSONArray("gameIds") ?: JSONArray()).ints(), (o.optJSONArray("goals") ?: JSONArray()).ints(),
+        o.optInt("sp", 100), o.str("endsAt"), o.optBoolean("active", true), o.optBoolean("builtin"),
+    )
+
+    suspend fun adminChallenges(): List<AdminChallenge> = io {
+        (call("GET", "/v1/admin/challenges").optJSONArray("items") ?: JSONArray()).objects().map { parseAdminChallenge(it) }
+    }
+
+    suspend fun saveChallenge(id: Int?, body: JSONObject): AdminChallenge = io {
+        parseAdminChallenge(if (id == null) call("POST", "/v1/admin/challenges", body) else call("PUT", "/v1/admin/challenges/$id", body))
+    }
+
+    suspend fun deleteChallenge(id: Int) = io {
+        call("DELETE", "/v1/admin/challenges/$id")
+        Unit
+    }
 }
 
 /** Games the server found when it refused to add a duplicate. */

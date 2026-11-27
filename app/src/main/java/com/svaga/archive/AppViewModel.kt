@@ -630,6 +630,9 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
             "creator_cannot_delete" -> R.string.err_creator_delete
             "invalid_price" -> R.string.err_price
             "too_many" -> R.string.err_too_many
+            "invalid_pattern" -> R.string.err_pattern
+            "games_required" -> R.string.err_games_required
+            "invalid_dates" -> R.string.err_dates
             else -> when {
                 e.http == 429 -> R.string.err_too_many
                 e.http >= 500 -> R.string.err_server
@@ -700,6 +703,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
                 items.filter { it.id > seen && !it.read && (it.kind == "achievement" || it.kind == "level_up") }
                     .sortedBy { it.id }
                     .forEach {
+                        DynAch.put(it.payload.optString("code"), it.payload.optString("title").ifBlank { null }, null, it.payload.optString("emoji").ifBlank { null }, emptyList())
                         toastQueue.addLast(
                             UiToast(
                                 kind = it.kind,

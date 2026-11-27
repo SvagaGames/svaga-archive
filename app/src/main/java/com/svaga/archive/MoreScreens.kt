@@ -124,6 +124,14 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
             SvCard(Modifier.fillMaxWidth().padding(horizontal = 16.dp), padding = 0.dp) {
                 SettingRow(Icons.Filled.Notifications, stringResource(R.string.notifications_title), value = if (vm.unread > 0) vm.unread.toString() else null, onClick = { nav.go(Routes.NOTIFICATIONS) })
                 Divider1()
+                var pushOn by remember { mutableStateOf(Push.enabled(ctx)) }
+                SettingRow(
+                    Icons.Filled.Notifications, stringResource(R.string.push_title), subtitle = stringResource(R.string.push_hint),
+                    trailing = {
+                        Switch(pushOn, { pushOn = it; Push.setEnabled(ctx, it) }, colors = SwitchDefaults.colors(checkedTrackColor = Cyan, checkedThumbColor = Color.White))
+                    },
+                )
+                Divider1()
                 SettingRow(Icons.Filled.Star, stringResource(R.string.ach_title), onClick = { nav.go(Routes.ACHIEVEMENTS) })
                 Divider1()
                 SettingRow(Icons.Filled.ThumbUp, stringResource(R.string.stats_title), onClick = { nav.go(Routes.STATS) })
@@ -146,6 +154,8 @@ fun SettingsScreen(vm: AppViewModel, nav: Nav) {
                     SettingRow(Icons.Filled.Build, stringResource(R.string.admin_title), tint = Amber, onClick = { nav.go(Routes.ADMIN) })
                     Divider1()
                     SettingRow(Icons.Filled.Edit, stringResource(R.string.news_new), tint = Amber, onClick = { nav.go(Routes.NEWS_NEW) })
+                    Divider1()
+                    SettingRow(Icons.Filled.Star, stringResource(R.string.ch_admin_title), tint = Amber, onClick = { nav.go(Routes.CHALLENGES) })
                 }
             }
 
@@ -253,7 +263,7 @@ fun notificationText(n: NotificationItem): String {
     return when (n.kind) {
         "achievement" -> stringResource(
             R.string.n_achievement,
-            achTitle(n.payload.optString("code")) + " " + ROMAN.getOrElse(n.payload.optInt("tier", 1)) { "" },
+            (n.payload.optString("title").ifBlank { null } ?: achTitle(n.payload.optString("code"))) + " " + ROMAN.getOrElse(n.payload.optInt("tier", 1)) { "" },
             n.payload.optInt("sp", 0),
         )
         "level_up" -> stringResource(R.string.n_level_up, levelName(n.payload.optInt("level", 1)))
@@ -261,6 +271,8 @@ fun notificationText(n: NotificationItem): String {
         "friend_accepted" -> stringResource(R.string.n_friend_accepted, name)
         "friend_declined" -> stringResource(R.string.n_friend_declined, name)
         "comment_like" -> stringResource(R.string.n_comment_like, name)
+        "release" -> stringResource(R.string.n_release, name)
+        "news" -> stringResource(R.string.n_news, n.payload.optString("title"))
         else -> n.kind
     }
 }
@@ -292,7 +304,7 @@ fun NotificationsScreen(vm: AppViewModel, nav: Nav) {
                                     val uid = n.payload.optString("userId")
                                     if (uid.isNotEmpty()) nav.user(uid)
                                 }
-                                "comment_like" -> {
+                                "comment_like", "release" -> {
                                     val gid = n.payload.optInt("gameId", 0)
                                     if (gid > 0) nav.game(gid)
                                 }

@@ -157,6 +157,8 @@ object Routes {
     const val COLLECTION = "collection"
     const val STEAM = "steam"
     const val RA = "retroachievements"
+    const val LEADERBOARD = "leaderboard"
+    const val CHALLENGES = "challenges"
     fun game(id: Int) = "game/$id"
     fun user(id: String) = "user/$id"
 }
@@ -196,6 +198,8 @@ fun MainNav(vm: AppViewModel) {
         composable(Routes.COLLECTION) { CollectionScreen(vm, nav) }
         composable(Routes.STEAM) { SteamImportScreen(vm, nav) }
         composable(Routes.RA) { RaScreen(vm, nav) }
+        composable(Routes.LEADERBOARD) { LeaderboardScreen(vm, nav) }
+        composable(Routes.CHALLENGES) { ChallengesAdminScreen(vm, nav) }
     }
 }
 
