@@ -61,8 +61,8 @@ jobs:
         run: |
           VERSION=$(grep -o 'versionName = "[^"]*"' app/build.gradle.kts | cut -d'"' -f2)
           TAG="v$VERSION"
-          NOTES="Сборка ${GITHUB_SHA::7}"
-          [ -f CHANGELOG.md ] && NOTES="$(awk '/^## /{n++} n==1' CHANGELOG.md)"
+          NOTES="Svaga Archive $VERSION"
+          [ -f CHANGELOG.md ] && NOTES="$(awk '/^## /{n++} n==1' CHANGELOG.md | sed -E 's/ \((сборка|build) [0-9]+\)//')"
           # the build number lets the app compare versions even if the version name ever goes down (1.7.0 -> 1.0)
           CODE=$(grep -o 'versionCode = [0-9]*' app/build.gradle.kts | grep -o '[0-9]*')
           NOTES="$(printf '%s\n\n<!-- vc:%s -->' "$NOTES" "$CODE")"

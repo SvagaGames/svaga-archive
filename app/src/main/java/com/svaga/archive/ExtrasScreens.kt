@@ -684,7 +684,7 @@ fun UpdatesRow() {
     }
     SettingRow(
         Icons.Filled.Refresh,
-        stringResource(R.string.update_title) + " · " + stringResource(R.string.version_build, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+        stringResource(R.string.update_title) + " · " + BuildConfig.VERSION_NAME,
         subtitle = subtitle,
         onClick = when {
             u == null || !u.canCheck -> null

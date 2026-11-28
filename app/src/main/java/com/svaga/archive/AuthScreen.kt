@@ -121,7 +121,7 @@ fun AuthScreen(vm: AppViewModel) {
                 SocialLoginButtons(vm)
             }
             Spacer(Modifier.height(32.dp))
-            Caption(stringResource(R.string.version, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE), maxLines = 1)
+            Caption(stringResource(R.string.version, BuildConfig.VERSION_NAME), maxLines = 1)
             Spacer(Modifier.height(24.dp))
         }
     }

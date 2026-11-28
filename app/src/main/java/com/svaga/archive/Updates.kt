@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.sp
 /** A newer version the store (or GitHub) offers. */
 data class UpdateOffer(val version: String?, val notes: String?, val build: Int? = null)
 
-/** "1.0 (сборка 33)" — every build is 1.0 until the store release, so the build number tells them apart. */
+/** Only the version is shown ("1.0"); the build number stays hidden and is used just to compare builds. */
 @Composable
-fun offerLabel(o: UpdateOffer): String? = o.version?.let { v -> o.build?.let { stringResource(R.string.version_build, v, it) } ?: v }
+fun offerLabel(o: UpdateOffer): String? = o.version
 
 /** Shared between the store-specific updater (created by MainActivity) and the UI. */
 object UpdateState {

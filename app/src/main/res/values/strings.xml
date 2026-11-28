@@ -48,7 +48,7 @@
     <string name="profile_account">ACCOUNT</string>
     <string name="logout">LOG OUT</string>
     <string name="data_credit">Game data: IGDB.com</string>
-    <string name="version">Svaga Games · v%1$s (build %2$d)</string>
+    <string name="version">Svaga Games · v%1$s</string>
 
     <string name="err_network">No connection to the server</string>
     <string name="err_invalid_credentials">Wrong e-mail or password</string>
@@ -893,7 +893,6 @@
     <string name="ach2_dressed_up_d">Wear a frame, a background and a badge at once</string>
     <string name="pass_title">Season pass</string>
     <string name="pass_days_left">%1$d d left</string>
-    <string name="version_build">%1$s (build %2$d)</string>
     <string name="pass_winter">Winter %1$d/%2$02d</string>
     <string name="pass_spring">Spring %1$d</string>
     <string name="pass_summer">Summer %1$d</string>
