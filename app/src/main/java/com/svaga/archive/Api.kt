@@ -49,6 +49,8 @@ data class LibraryItem(
     val note: String?,
     val favorite: Boolean,
     val updatedAt: String,
+    /** The platform the game was completed on (one of the game's platforms), if the player chose it. */
+    val completedOn: String? = null,
 )
 
 data class Profile(
@@ -453,6 +455,7 @@ fun parseLibraryItem(o: JSONObject): LibraryItem = LibraryItem(
     note = o.str("note"),
     favorite = o.optBoolean("favorite", false),
     updatedAt = o.str("updatedAt") ?: "",
+    completedOn = o.str("completedOn"),
 )
 
 fun libraryItemToJson(i: LibraryItem): JSONObject = JSONObject()
@@ -462,6 +465,7 @@ fun libraryItemToJson(i: LibraryItem): JSONObject = JSONObject()
     .put("note", i.note ?: JSONObject.NULL)
     .put("favorite", i.favorite)
     .put("updatedAt", i.updatedAt)
+    .put("completedOn", i.completedOn ?: JSONObject.NULL)
 
 private fun parsePerson(o: JSONObject): Person = Person(
     id = o.optString("id"),
@@ -793,6 +797,7 @@ class ApiClient(private val store: TokenStore) {
             note = o.str("note"),
             favorite = o.optBoolean("favorite", false),
             updatedAt = java.time.Instant.now().toString(),
+            completedOn = o.str("completedOn"),
         )
     }
 

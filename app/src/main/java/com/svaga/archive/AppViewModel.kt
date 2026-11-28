@@ -1607,6 +1607,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setStatus(gameId: Int, status: String?) = update(gameId) { put("status", status ?: JSONObject.NULL) }
 
+    /** Marks a game completed on one of its platforms (null: not said). */
+    fun setCompleted(gameId: Int, platform: String?) = update(gameId) {
+        put("status", "completed")
+        put("completedOn", platform ?: JSONObject.NULL)
+    }
+
+    fun setCompletedOn(gameId: Int, platform: String?) = update(gameId) { put("completedOn", platform ?: JSONObject.NULL) }
+
     fun setRating(gameId: Int, rating: Int?) = update(gameId) { put("rating", rating ?: JSONObject.NULL) }
 
     fun setFavorite(gameId: Int, favorite: Boolean) = update(gameId) { put("favorite", favorite) }

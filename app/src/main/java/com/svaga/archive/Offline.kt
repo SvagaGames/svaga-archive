@@ -79,5 +79,10 @@ fun LibraryItem.withEdit(fields: JSONObject): LibraryItem = copy(
     rating = if (fields.has("rating")) (if (fields.isNull("rating")) null else fields.optInt("rating")) else rating,
     note = if (fields.has("note")) (if (fields.isNull("note")) null else fields.optString("note")) else note,
     favorite = if (fields.has("favorite")) fields.optBoolean("favorite") else favorite,
+    completedOn = when {
+        fields.has("status") && fields.optString("status") != "completed" -> null
+        fields.has("completedOn") -> if (fields.isNull("completedOn")) null else fields.optString("completedOn")
+        else -> completedOn
+    },
     updatedAt = java.time.Instant.now().toString(),
 )

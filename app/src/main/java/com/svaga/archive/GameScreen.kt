@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -83,6 +85,7 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
     val entry = vm.library[id]
     var statusSheet by remember { mutableStateOf(false) }
     var pickPlatform by remember { mutableStateOf(false) }
+    var completedSheet by remember { mutableStateOf(false) }
     var share by remember { mutableStateOf(false) }
     val ctx = LocalContext.current
 
@@ -142,6 +145,21 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                     IconBtn(Icons.Filled.Menu, { addToList = true }, size = 50.dp)
                     Spacer(Modifier.width(10.dp))
                     IconBtn(Icons.Filled.Share, { share = true }, size = 50.dp)
+                }
+                if (entry?.status == "completed" && game.platforms.isNotEmpty()) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp).clip(RoundedCornerShape(12.dp))
+                            .clickable { completedSheet = true }.padding(horizontal = 4.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.Filled.SportsEsports, null, tint = statusColor("completed"), modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Body(
+                            entry.completedOn?.let { stringResource(R.string.completed_on, it) } ?: stringResource(R.string.completed_on_pick),
+                            Modifier.weight(1f), size = 14.sp, color = if (entry.completedOn != null) Ink else Muted,
+                        )
+                        Icon(Icons.Filled.Edit, null, tint = Muted, modifier = Modifier.size(16.dp))
+                    }
                 }
                 // the Creator decides which games get the Svaga Emulator button
                 if (vm.extras.emulator[id]?.enabled == true) {
@@ -308,7 +326,26 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
             GameShareCard(shareGame, entry, vm.playtimeByGame[id])
         }
     }
-    if (statusSheet) StatusSheet(entry?.status, onPick = { vm.setStatus(id, it); statusSheet = false }, onDismiss = { statusSheet = false })
+    if (statusSheet) StatusSheet(entry?.status, onPick = { st ->
+        statusSheet = false
+        val plats = game?.platforms.orEmpty()
+        when {
+            // completed: ask on which platform, since a game can look very different on each one
+            st == "completed" && plats.size > 1 -> completedSheet = true
+            st == "completed" && plats.size == 1 -> vm.setCompleted(id, plats.first())
+            else -> vm.setStatus(id, st)
+        }
+    }, onDismiss = { statusSheet = false })
+    if (completedSheet && game != null) {
+        CompletedOnSheet(game.platforms, entry?.completedOn, onPick = { p ->
+            completedSheet = false
+            if (entry?.status == "completed") vm.setCompletedOn(id, p) else vm.setCompleted(id, p)
+        }, onDismiss = {
+            completedSheet = false
+            // closing the sheet still marks the game completed, just without a platform
+            if (entry?.status != "completed") vm.setCompleted(id, null)
+        })
+    }
     if (pickPlatform && game != null) {
         PlatformPicker(
             vm.platforms.filter { it.id !in game.platformIds },
@@ -401,6 +438,37 @@ private fun StatusSheet(current: String?, onPick: (String?) -> Unit, onDismiss: 
                     Spacer(Modifier.width(12.dp))
                     Body(stringResource(R.string.remove_from_library), color = Red, size = 17.sp)
                 }
+            }
+        }
+    }
+}
+
+/** "Completed on which platform?" — only the game's own platforms, plus "don't say". */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CompletedOnSheet(platforms: List<String>, current: String?, onPick: (String?) -> Unit, onDismiss: () -> Unit) {
+    val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state, containerColor = Bg) {
+        Column(Modifier.fillMaxWidth().heightIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
+            H2(stringResource(R.string.completed_on_title), Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            Caption(stringResource(R.string.completed_on_hint), Modifier.padding(horizontal = 20.dp), maxLines = Int.MAX_VALUE)
+            Spacer(Modifier.height(8.dp))
+            platforms.distinct().forEach { p ->
+                Row(
+                    Modifier.fillMaxWidth().clickable { onPick(p) }.padding(horizontal = 20.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Body(p, Modifier.weight(1f), size = 17.sp, weight = if (p == current) FontWeight.Bold else FontWeight.Normal)
+                    if (p == current) Icon(Icons.Filled.Check, null, tint = statusColor("completed"))
+                }
+            }
+            Divider1(Modifier.padding(vertical = 6.dp))
+            Row(
+                Modifier.fillMaxWidth().clickable { onPick(null) }.padding(horizontal = 20.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Body(stringResource(R.string.completed_on_none), Modifier.weight(1f), size = 17.sp, color = Muted)
+                if (current == null) Icon(Icons.Filled.Check, null, tint = Muted)
             }
         }
     }
