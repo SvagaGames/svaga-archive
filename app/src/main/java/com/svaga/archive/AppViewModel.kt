@@ -1607,13 +1607,13 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
 
     fun setStatus(gameId: Int, status: String?) = update(gameId) { put("status", status ?: JSONObject.NULL) }
 
-    /** Marks a game completed on one of its platforms (null: not said). */
-    fun setCompleted(gameId: Int, platform: String?) = update(gameId) {
+    /** Marks a game completed on the platforms it was finished on (empty: not said). */
+    fun setCompleted(gameId: Int, platforms: List<String>) = update(gameId) {
         put("status", "completed")
-        put("completedOn", platform ?: JSONObject.NULL)
+        put("completedOn", org.json.JSONArray(platforms.distinct()))
     }
 
-    fun setCompletedOn(gameId: Int, platform: String?) = update(gameId) { put("completedOn", platform ?: JSONObject.NULL) }
+    fun setCompletedOn(gameId: Int, platforms: List<String>) = update(gameId) { put("completedOn", org.json.JSONArray(platforms.distinct())) }
 
     fun setRating(gameId: Int, rating: Int?) = update(gameId) { put("rating", rating ?: JSONObject.NULL) }
 

@@ -916,7 +916,8 @@
     <string name="stores_hint">Заливка — прямая ссылка на игру. Рамка — поиск по названию в магазине платформы.</string>
     <string name="completed_on">Пройдено на: %1$s</string>
     <string name="completed_on_pick">На какой платформе пройдено? Укажи</string>
-    <string name="completed_on_title">На какой платформе пройдено?</string>
-    <string name="completed_on_hint">На разных платформах игра может выглядеть и играться совсем по-разному. Выбери ту, на которой прошёл.</string>
+    <string name="completed_on_title">На каких платформах пройдено?</string>
+    <string name="completed_on_hint">На разных платформах игра может выглядеть и играться совсем по-разному. Отметь все, на которых прошёл.</string>
     <string name="completed_on_none">Не указывать</string>
+    <string name="completed_on_done">Готово</string>
 </resources>

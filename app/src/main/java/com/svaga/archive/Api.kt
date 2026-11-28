@@ -50,7 +50,8 @@ data class LibraryItem(
     val favorite: Boolean,
     val updatedAt: String,
     /** The platform the game was completed on (one of the game's platforms), if the player chose it. */
-    val completedOn: String? = null,
+    /** Platforms the game was completed on (a game may be finished on several). */
+    val completedOn: List<String> = emptyList(),
 )
 
 data class Profile(
@@ -390,6 +391,11 @@ class TokenStore(context: Context) {
 
 private fun JSONObject.str(name: String): String? = if (isNull(name)) null else optString(name)
 
+/** completedOnList from the server; older servers and caches send one platform as a string. */
+fun JSONObject.completedOnOf(): List<String> =
+    optJSONArray("completedOnList")?.let { a -> (0 until a.length()).map { a.optString(it) }.filter { it.isNotBlank() } }
+        ?: str("completedOn")?.split('\n')?.map { it.trim() }?.filter { it.isNotBlank() }.orEmpty()
+
 private fun JSONObject.intOrNull(name: String): Int? = if (isNull(name)) null else optInt(name)
 
 private fun JSONArray.strings(): List<String> =
@@ -455,7 +461,7 @@ fun parseLibraryItem(o: JSONObject): LibraryItem = LibraryItem(
     note = o.str("note"),
     favorite = o.optBoolean("favorite", false),
     updatedAt = o.str("updatedAt") ?: "",
-    completedOn = o.str("completedOn"),
+    completedOn = o.completedOnOf(),
 )
 
 fun libraryItemToJson(i: LibraryItem): JSONObject = JSONObject()
@@ -465,7 +471,7 @@ fun libraryItemToJson(i: LibraryItem): JSONObject = JSONObject()
     .put("note", i.note ?: JSONObject.NULL)
     .put("favorite", i.favorite)
     .put("updatedAt", i.updatedAt)
-    .put("completedOn", i.completedOn ?: JSONObject.NULL)
+    .put("completedOnList", org.json.JSONArray(i.completedOn))
 
 private fun parsePerson(o: JSONObject): Person = Person(
     id = o.optString("id"),
@@ -797,7 +803,7 @@ class ApiClient(private val store: TokenStore) {
             note = o.str("note"),
             favorite = o.optBoolean("favorite", false),
             updatedAt = java.time.Instant.now().toString(),
-            completedOn = o.str("completedOn"),
+            completedOn = o.completedOnOf(),
         )
     }
 

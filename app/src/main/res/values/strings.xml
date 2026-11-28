@@ -914,7 +914,8 @@
     <string name="stores_hint">Filled — a direct link to the game. Outlined — a search by name in the platform\'s store.</string>
     <string name="completed_on">Completed on: %1$s</string>
     <string name="completed_on_pick">Which platform did you complete it on? Tap to set</string>
-    <string name="completed_on_title">Which platform did you complete it on?</string>
-    <string name="completed_on_hint">A game can look and play very differently on each platform. Pick the one you finished it on.</string>
+    <string name="completed_on_title">Which platforms did you complete it on?</string>
+    <string name="completed_on_hint">A game can look and play very differently on each platform. Tick every one you finished it on.</string>
     <string name="completed_on_none">Don\'t say</string>
+    <string name="completed_on_done">Done</string>
 </resources>

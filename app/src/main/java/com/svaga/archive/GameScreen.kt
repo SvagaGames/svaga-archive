@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -155,8 +157,9 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                         Icon(Icons.Filled.SportsEsports, null, tint = statusColor("completed"), modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
                         Body(
-                            entry.completedOn?.let { stringResource(R.string.completed_on, it) } ?: stringResource(R.string.completed_on_pick),
-                            Modifier.weight(1f), size = 14.sp, color = if (entry.completedOn != null) Ink else Muted,
+                            if (entry.completedOn.isNotEmpty()) stringResource(R.string.completed_on, entry.completedOn.joinToString(", "))
+                            else stringResource(R.string.completed_on_pick),
+                            Modifier.weight(1f), size = 14.sp, color = if (entry.completedOn.isNotEmpty()) Ink else Muted,
                         )
                         Icon(Icons.Filled.Edit, null, tint = Muted, modifier = Modifier.size(16.dp))
                     }
@@ -332,18 +335,18 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
         when {
             // completed: ask on which platform, since a game can look very different on each one
             st == "completed" && plats.size > 1 -> completedSheet = true
-            st == "completed" && plats.size == 1 -> vm.setCompleted(id, plats.first())
+            st == "completed" && plats.size == 1 -> vm.setCompleted(id, plats)
             else -> vm.setStatus(id, st)
         }
     }, onDismiss = { statusSheet = false })
     if (completedSheet && game != null) {
-        CompletedOnSheet(game.platforms, entry?.completedOn, onPick = { p ->
+        CompletedOnSheet(game.platforms, entry?.completedOn.orEmpty(), onDone = { picked ->
             completedSheet = false
-            if (entry?.status == "completed") vm.setCompletedOn(id, p) else vm.setCompleted(id, p)
+            if (entry?.status == "completed") vm.setCompletedOn(id, picked) else vm.setCompleted(id, picked)
         }, onDismiss = {
             completedSheet = false
             // closing the sheet still marks the game completed, just without a platform
-            if (entry?.status != "completed") vm.setCompleted(id, null)
+            if (entry?.status != "completed") vm.setCompleted(id, emptyList())
         })
     }
     if (pickPlatform && game != null) {
@@ -443,32 +446,35 @@ private fun StatusSheet(current: String?, onPick: (String?) -> Unit, onDismiss: 
     }
 }
 
-/** "Completed on which platform?" — only the game's own platforms, plus "don't say". */
+/** "Completed on which platforms?" — the game's own platforms as checkboxes; several can be ticked. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CompletedOnSheet(platforms: List<String>, current: String?, onPick: (String?) -> Unit, onDismiss: () -> Unit) {
+private fun CompletedOnSheet(platforms: List<String>, current: List<String>, onDone: (List<String>) -> Unit, onDismiss: () -> Unit) {
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val all = platforms.distinct()
+    val picked = remember { mutableStateListOf<String>().apply { addAll(current.filter { it in all }) } }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state, containerColor = Bg) {
-        Column(Modifier.fillMaxWidth().heightIn(max = 560.dp).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-            H2(stringResource(R.string.completed_on_title), Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
-            Caption(stringResource(R.string.completed_on_hint), Modifier.padding(horizontal = 20.dp), maxLines = Int.MAX_VALUE)
-            Spacer(Modifier.height(8.dp))
-            platforms.distinct().forEach { p ->
-                Row(
-                    Modifier.fillMaxWidth().clickable { onPick(p) }.padding(horizontal = 20.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Body(p, Modifier.weight(1f), size = 17.sp, weight = if (p == current) FontWeight.Bold else FontWeight.Normal)
-                    if (p == current) Icon(Icons.Filled.Check, null, tint = statusColor("completed"))
+        Column(Modifier.fillMaxWidth().heightIn(max = 600.dp).padding(bottom = 16.dp)) {
+            Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState())) {
+                H2(stringResource(R.string.completed_on_title), Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+                Caption(stringResource(R.string.completed_on_hint), Modifier.padding(horizontal = 20.dp), maxLines = Int.MAX_VALUE)
+                Spacer(Modifier.height(8.dp))
+                all.forEach { p ->
+                    val on = p in picked
+                    Row(
+                        Modifier.fillMaxWidth().clickable { if (on) picked.remove(p) else picked.add(p) }.padding(horizontal = 12.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(on, { if (on) picked.remove(p) else picked.add(p) },
+                            colors = CheckboxDefaults.colors(checkedColor = statusColor("completed")))
+                        Body(p, Modifier.weight(1f), size = 17.sp, weight = if (on) FontWeight.Bold else FontWeight.Normal)
+                    }
                 }
             }
             Divider1(Modifier.padding(vertical = 6.dp))
-            Row(
-                Modifier.fillMaxWidth().clickable { onPick(null) }.padding(horizontal = 20.dp, vertical = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Body(stringResource(R.string.completed_on_none), Modifier.weight(1f), size = 17.sp, color = Muted)
-                if (current == null) Icon(Icons.Filled.Check, null, tint = Muted)
+            Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                SvButton(stringResource(R.string.completed_on_none), { onDone(emptyList()) }, Modifier.weight(1f), kind = BtnKind.Secondary)
+                SvButton(stringResource(R.string.completed_on_done), { onDone(all.filter { it in picked }) }, Modifier.weight(1f), icon = Icons.Filled.Check)
             }
         }
     }
