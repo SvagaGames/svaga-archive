@@ -130,11 +130,9 @@ private fun StatusGrid(library: Collection<LibraryItem>, onOpen: ((String) -> Un
         keys.chunked(2).forEach { pair ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 pair.forEach { k ->
-                    StatTile(
-                        library.count { it.status == k }.toString(),
-                        statusLabel(k),
+                    StatusTile(
+                        k, library.count { it.status == k },
                         Modifier.weight(1f),
-                        accent = statusColor(k),
                         onClick = onOpen?.let { f -> { f(k) } },
                     )
                 }
@@ -159,7 +157,7 @@ private fun EventsList(items: List<LibraryItem>, vm: AppViewModel, nav: Nav) {
             Column(Modifier.weight(1f)) {
                 Body(g?.name ?: "#${item.gameId}", size = 15.sp, weight = FontWeight.SemiBold, maxLines = 2)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    item.status?.let { Caption(statusLabel(it), color = statusColor(it), maxLines = 1) }
+                    item.status?.let { StatusPill(it, filled = false) }
                     if (item.favorite) {
                         Spacer(Modifier.width(6.dp))
                         Icon(Icons.Filled.Favorite, null, tint = Pink, modifier = Modifier.size(14.dp))
@@ -370,7 +368,7 @@ fun UserProfileScreen(vm: AppViewModel, id: String, nav: Nav) {
             Spacer(Modifier.height(8.dp))
             ChipRow {
                 listOf("all", "playing", "backlog", "completed", "dropped", "fav").forEach { k ->
-                    SvChip(statusLabel(k), libTab == k, { libTab = k }, accent = statusColor(k))
+                    SvChip(statusLabel(k), libTab == k, { libTab = k }, accent = statusColor(k), icon = if (k == "all") null else statusIcon(k))
                 }
             }
             val shown = lib.filter {

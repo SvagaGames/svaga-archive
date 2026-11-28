@@ -33,9 +33,12 @@ data class Game(
     val custom: Boolean = false,
     val variantIds: List<Int> = emptyList(),
     val addedBy: String? = null,
+    val stores: List<StoreLink> = emptyList(),
 ) {
     val year: Int? get() = releaseDate?.take(4)?.toIntOrNull()
 }
+
+data class StoreLink(val store: String, val url: String, val search: Boolean)
 
 data class GameLanguages(val audio: List<String>, val subtitles: List<String>, val ui: List<String>)
 
@@ -153,7 +156,7 @@ data class Comment(
     val badge: String? = null,
 )
 
-data class GameStats(val avgRating: Double?, val ratingCount: Int, val inLibrary: Int, val completed: Int)
+data class GameStats(val avgRating: Double?, val ratingCount: Int, val inLibrary: Int, val completed: Int, val playing: Int = 0, val backlog: Int = 0, val dropped: Int = 0)
 
 data class Platform(
     val id: Int,
@@ -418,6 +421,10 @@ fun parseGame(o: JSONObject): Game = Game(
     custom = o.optBoolean("custom", false),
     variantIds = o.optJSONArray("variantIds")?.ints() ?: emptyList(),
     addedBy = o.str("addedBy"),
+    stores = (o.optJSONArray("stores") ?: JSONArray()).objects().mapNotNull {
+        val u = it.optString("url")
+        if (u.startsWith("http")) StoreLink(it.optString("store"), u, it.optBoolean("search")) else null
+    },
 )
 
 fun gameToJson(g: Game): JSONObject = JSONObject()
@@ -916,6 +923,9 @@ class ApiClient(private val store: TokenStore) {
             ratingCount = o.optInt("ratingCount", 0),
             inLibrary = o.optInt("inLibrary", 0),
             completed = o.optInt("completed", 0),
+            playing = o.optInt("playing", 0),
+            backlog = o.optInt("backlog", 0),
+            dropped = o.optInt("dropped", 0),
         )
     }
 

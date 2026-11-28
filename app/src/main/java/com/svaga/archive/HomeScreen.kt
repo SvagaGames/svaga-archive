@@ -164,7 +164,7 @@ fun ReleaseCard(g: Game, status: String?, onClick: () -> Unit) {
                     Text(date.format(DateTimeFormatter.ofPattern("MMM", Locale(Lang.code))).trimEnd('.'), color = Color.White, fontSize = 12.sp)
                 }
             }
-            if (status != null) Pill(statusLabel(status), statusColor(status), Modifier.align(Alignment.BottomEnd).padding(10.dp), filled = true)
+            if (status != null) StatusPill(status, Modifier.align(Alignment.BottomEnd).padding(10.dp))
         }
         Spacer(Modifier.height(6.dp))
         Body(g.name, size = 16.sp, weight = FontWeight.SemiBold, maxLines = 1)

@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
@@ -120,6 +121,17 @@ fun tierColor(tier: Int): Color = when (tier) {
     4 -> Color(0xFF9FE8D8)
     5 -> Color(0xFF3EE0FF)
     else -> Muted
+}
+
+/** Icon of a library status — shown on pills, chips, tiles and the status picker. */
+fun statusIcon(key: String?): ImageVector = when (key) {
+    "backlog" -> Icons.Filled.TrackChanges
+    "playing" -> Icons.Filled.SportsEsports
+    "completed" -> Icons.Filled.Verified
+    "dropped" -> Icons.Filled.Block
+    "wont_play" -> Icons.Filled.VisibilityOff
+    "fav" -> Icons.Filled.Favorite
+    else -> Icons.Filled.Apps
 }
 
 fun statusColor(key: String?): Color = when (key) {
@@ -354,6 +366,7 @@ fun SvChip(
     modifier: Modifier = Modifier,
     accent: Color = Cyan,
     count: Int? = null,
+    icon: ImageVector? = null,
 ) {
     val shape = RoundedCornerShape(50)
     Row(
@@ -365,6 +378,10 @@ fun SvChip(
             .padding(horizontal = 16.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (icon != null) {
+            Icon(icon, null, tint = accent, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.width(6.dp))
+        }
         Text(text, color = if (selected) accent else Ink, fontSize = 14.sp, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal, maxLines = 1)
         if (count != null) {
             Spacer(Modifier.width(6.dp))
@@ -645,18 +662,26 @@ fun StatTile(value: String, label: String, modifier: Modifier = Modifier, accent
 
 /** Small pill with text, e.g. a status or "IGDB 87". */
 @Composable
-fun Pill(text: String, color: Color, modifier: Modifier = Modifier, filled: Boolean = false) {
-    Text(
-        text,
-        color = if (filled) Color(0xFF071018) else color,
-        fontSize = 11.sp,
-        fontWeight = FontWeight.Bold,
-        maxLines = 1,
-        modifier = modifier
+fun Pill(text: String, color: Color, modifier: Modifier = Modifier, filled: Boolean = false, icon: ImageVector? = null) {
+    val fg = if (filled) Color(0xFF071018) else color
+    Row(
+        modifier
             .background(if (filled) color else color.copy(alpha = 0.16f), RoundedCornerShape(8.dp))
             .padding(horizontal = 7.dp, vertical = 3.dp),
-    )
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (icon != null) {
+            Icon(icon, null, tint = fg, modifier = Modifier.size(12.dp))
+            Spacer(Modifier.width(3.dp))
+        }
+        Text(text, color = fg, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+    }
 }
+
+/** A status pill: icon + name in the status colour. */
+@Composable
+fun StatusPill(status: String, modifier: Modifier = Modifier, filled: Boolean = true) =
+    Pill(statusLabel(status), statusColor(status), modifier, filled = filled, icon = statusIcon(status))
 
 /** Rating badge "★ 8.4". */
 @Composable
@@ -766,3 +791,21 @@ fun compact(n: Long): String = when {
 }
 
 fun compact(n: Int): String = compact(n.toLong())
+
+/** Like StatTile, with the status icon above the number. */
+@Composable
+fun StatusTile(status: String, n: Int, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    val shape = RoundedCornerShape(18.dp)
+    val c = statusColor(status)
+    Column(
+        modifier.clip(shape).background(Panel, shape).border(1.dp, Stroke, shape)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(vertical = 14.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(statusIcon(status), null, tint = c, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.height(4.dp))
+        Text(n.toString(), color = c, fontSize = 28.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(statusLabel(status), color = Muted, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}

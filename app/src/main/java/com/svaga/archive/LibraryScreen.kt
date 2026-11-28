@@ -77,7 +77,7 @@ fun LibraryScreen(vm: AppViewModel, nav: Nav, status: String, onStatus: (String)
         Spacer(Modifier.height(8.dp))
         ChipRow {
             LIB_KEYS.forEach { key ->
-                SvChip(statusLabel(key), status == key, { onStatus(key) }, accent = statusColor(key), count = counts[key])
+                SvChip(statusLabel(key), status == key, { onStatus(key) }, accent = statusColor(key), count = counts[key], icon = if (key == "all") null else statusIcon(key))
             }
         }
         ChipRow(Modifier.padding(top = 2.dp)) {

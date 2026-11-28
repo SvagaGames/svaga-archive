@@ -907,4 +907,10 @@
     <string name="pass_number">Season %1$d · %2$s</string>
     <string name="provider_off">Sign-in with %1$s is not enabled on the server yet.</string>
     <string name="bingo_soon_hint">The first card opens with Season 1 — Winter 2026/27. Only what you do from that day counts.</string>
+    <string name="gs_playing">Playing</string>
+    <string name="gs_want">Want</string>
+    <string name="gs_completed_people">Completed</string>
+    <string name="gs_dropped">Dropped</string>
+    <string name="section_stores">Where to buy</string>
+    <string name="stores_hint">Filled — a direct link to the game. Outlined — a search by name in the platform\'s store.</string>
 </resources>

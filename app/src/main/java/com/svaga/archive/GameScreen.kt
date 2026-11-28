@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -130,7 +133,7 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                         Modifier.weight(1f),
                         kind = if (st != null) BtnKind.Ghost else BtnKind.Primary,
                         accent = if (st != null) statusColor(st) else null,
-                        icon = if (st != null) Icons.Filled.KeyboardArrowDown else Icons.Filled.Add,
+                        icon = if (st != null) statusIcon(st) else Icons.Filled.Add,
                     )
                     Spacer(Modifier.width(10.dp))
                     val fav = entry?.favorite == true
@@ -181,14 +184,24 @@ fun GameScreen(vm: AppViewModel, id: Int, nav: Nav) {
                     SectionHeader(stringResource(R.string.community_title), Modifier.padding(top = 10.dp))
                     Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            StatTile(compact(st.inLibrary), stringResource(R.string.gs_in_library), Modifier.weight(1f), accent = Cyan)
-                            StatTile(compact(st.completed), stringResource(R.string.gs_completed), Modifier.weight(1f), accent = Green)
+                            CommunityStatus("playing", st.playing, R.string.gs_playing, Modifier.weight(1f))
+                            CommunityStatus("backlog", st.backlog, R.string.gs_want, Modifier.weight(1f))
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            CommunityStatus("completed", st.completed, R.string.gs_completed_people, Modifier.weight(1f))
+                            CommunityStatus("dropped", st.dropped, R.string.gs_dropped, Modifier.weight(1f))
                         }
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             StatTile(compact(st.ratingCount), stringResource(R.string.gs_ratings), Modifier.weight(1f), accent = Amber)
                             StatTile(st.avgRating?.toString() ?: "—", stringResource(R.string.gs_avg), Modifier.weight(1f), accent = Pink)
                         }
                     }
+                }
+
+                // ---------- stores ----------
+                if (game.stores.isNotEmpty()) {
+                    SectionHeader(stringResource(R.string.section_stores), Modifier.padding(top = 10.dp))
+                    StoreRow(game.stores)
                 }
 
                 // ---------- about ----------
@@ -370,7 +383,9 @@ private fun StatusSheet(current: String?, onPick: (String?) -> Unit, onDismiss: 
                     Modifier.fillMaxWidth().clickable { onPick(s) }.padding(horizontal = 20.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(Modifier.size(12.dp).background(statusColor(s), CircleShape))
+                    Box(Modifier.size(38.dp).background(statusColor(s).copy(alpha = 0.16f), CircleShape), contentAlignment = Alignment.Center) {
+                        Icon(statusIcon(s), null, tint = statusColor(s), modifier = Modifier.size(22.dp))
+                    }
                     Spacer(Modifier.width(14.dp))
                     Body(statusLabel(s), Modifier.weight(1f), size = 17.sp, weight = if (s == current) FontWeight.Bold else FontWeight.Normal)
                     if (s == current) Icon(Icons.Filled.Check, null, tint = statusColor(s))
@@ -450,3 +465,60 @@ fun RuTranslationsBlock(vm: AppViewModel, gameId: Int) {
 
 @Suppress("unused")
 private fun fmt1(v: Double): String = String.format(Locale.US, "%.1f", v)
+
+/** "🎮 Играют 99" — a status with its icon and how many players have it. */
+@Composable
+private fun CommunityStatus(status: String, n: Int, label: Int, modifier: Modifier = Modifier) {
+    val c = statusColor(status)
+    Row(
+        modifier.clip(RoundedCornerShape(18.dp)).background(Panel).border(1.dp, com.svaga.archive.Stroke, RoundedCornerShape(18.dp))
+            .padding(horizontal = 14.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(statusIcon(status), null, tint = c, modifier = Modifier.size(22.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(label), color = Muted, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+        Text(compact(n.toLong()), color = Ink, fontSize = 22.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+    }
+}
+
+private val STORE_LOOKS = mapOf(
+    "steam" to Triple("Steam", 0xFF1B2838, 0xFF66C0F4),
+    "epic" to Triple("Epic Games Store", 0xFF2A2A2A, 0xFFFFFFFF),
+    "gog" to Triple("GOG", 0xFF5C2D91, 0xFFE4C7FF),
+    "playstation" to Triple("PlayStation Store", 0xFF00439C, 0xFFFFFFFF),
+    "xbox" to Triple("Xbox Store", 0xFF107C10, 0xFFFFFFFF),
+    "microsoft" to Triple("Microsoft Store", 0xFF0067B8, 0xFFFFFFFF),
+    "nintendo" to Triple("Nintendo eShop", 0xFFE60012, 0xFFFFFFFF),
+    "itch" to Triple("itch.io", 0xFFFA5C5C, 0xFFFFFFFF),
+    "appstore" to Triple("App Store", 0xFF0D84FF, 0xFFFFFFFF),
+    "googleplay" to Triple("Google Play", 0xFF01875F, 0xFFFFFFFF),
+    "amazon" to Triple("Amazon", 0xFF232F3E, 0xFFFF9900),
+    "gamejolt" to Triple("Game Jolt", 0xFF2F7F6F, 0xFFCCFF00),
+)
+
+/** Where the game is sold: a chip per store; "search" links are a store search by name, shown outlined. */
+@Composable
+private fun StoreRow(stores: List<StoreLink>) {
+    val ctx = LocalContext.current
+    LazyRow(contentPadding = PaddingValues(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        items(stores, key = { it.store }) { s ->
+            val look = STORE_LOOKS[s.store] ?: Triple(s.store, 0xFF2A2F3A, 0xFFFFFFFF)
+            val bg = Color(look.second)
+            val fg = Color(look.third)
+            val shape = RoundedCornerShape(50)
+            Row(
+                Modifier.clip(shape)
+                    .then(if (s.search) Modifier.border(1.5.dp, bg.copy(alpha = 0.9f).takeIf { look.second != 0xFF2A2A2A } ?: Ink.copy(alpha = 0.5f), shape) else Modifier.background(bg, shape))
+                    .clickable { openInBrowser(ctx, s.url) }
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(if (s.search) Icons.Filled.Search else Icons.Filled.ShoppingCart, null, tint = if (s.search) Ink else fg, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(look.first, color = if (s.search) Ink else fg, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            }
+        }
+    }
+    Caption(stringResource(R.string.stores_hint), Modifier.padding(horizontal = 20.dp, vertical = 6.dp), maxLines = Int.MAX_VALUE)
+}

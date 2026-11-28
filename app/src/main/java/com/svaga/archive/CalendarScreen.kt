@@ -117,7 +117,7 @@ private fun CalendarRow(date: LocalDate, g: Game, today: LocalDate, locale: Loca
         Spacer(Modifier.width(10.dp))
         Box(Modifier.width(120.dp).height(72.dp)) {
             Cover(g.screenshots.firstOrNull() ?: g.cover, Modifier.fillMaxSize())
-            if (status != null) Pill(statusLabel(status), statusColor(status), Modifier.align(Alignment.TopEnd).padding(4.dp), filled = true)
+            if (status != null) StatusPill(status, Modifier.align(Alignment.TopEnd).padding(4.dp))
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {

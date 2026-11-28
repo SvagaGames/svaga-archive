@@ -64,7 +64,7 @@ fun PosterCard(
         Box(Modifier.fillMaxWidth().aspectRatio(0.75f)) {
             Cover(game.cover, Modifier.fillMaxSize())
             if (status != null) {
-                Pill(statusLabel(status), statusColor(status), Modifier.align(Alignment.TopStart).padding(6.dp), filled = true)
+                StatusPill(status, Modifier.align(Alignment.TopStart).padding(6.dp))
             }
             val r = myRating?.toString() ?: game.rating?.let { String.format(Locale.US, "%.1f", it / 10.0) }
             if (r != null) StarBadge(r, Modifier.align(Alignment.BottomStart).padding(6.dp), color = if (myRating != null) Cyan else Amber)
@@ -99,7 +99,7 @@ fun GameRow(
             if (!sub.isNullOrBlank()) Caption(sub, maxLines = 2)
             if (status != null) {
                 Spacer(Modifier.height(4.dp))
-                Pill(statusLabel(status), statusColor(status))
+                StatusPill(status, filled = false)
             }
         }
         if (trailing != null) {

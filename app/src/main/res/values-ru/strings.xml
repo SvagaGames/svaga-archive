@@ -909,4 +909,10 @@
     <string name="pass_number">Сезон %1$d · %2$s</string>
     <string name="provider_off">Вход через %1$s ещё не включён на сервере.</string>
     <string name="bingo_soon_hint">Первая карточка откроется вместе с Сезоном 1 — Зима 2026/27. Засчитывается только то, что сделано с этого дня.</string>
+    <string name="gs_playing">Играют</string>
+    <string name="gs_want">Хотят</string>
+    <string name="gs_completed_people">Прошли</string>
+    <string name="gs_dropped">Бросили</string>
+    <string name="section_stores">Где купить</string>
+    <string name="stores_hint">Заливка — прямая ссылка на игру. Рамка — поиск по названию в магазине платформы.</string>
 </resources>

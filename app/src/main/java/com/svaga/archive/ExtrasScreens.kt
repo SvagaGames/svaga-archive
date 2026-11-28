@@ -577,7 +577,7 @@ fun GameShareCard(game: Game, entry: LibraryItem?, seconds: Long?) {
                 val line = listOfNotNull(game.year?.toString(), game.platforms.firstOrNull()).joinToString(" · ")
                 if (line.isNotBlank()) Text(line, color = Color(0xFF9AA3B5), fontSize = 13.sp, maxLines = 2)
                 Spacer(Modifier.height(10.dp))
-                entry?.status?.let { s -> Pill(statusLabel(s), statusColor(s), filled = true) }
+                entry?.status?.let { s -> StatusPill(s) }
                 entry?.rating?.let { r ->
                     Spacer(Modifier.height(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
