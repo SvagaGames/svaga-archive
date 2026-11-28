@@ -916,5 +916,5 @@
     <string name="completed_on_pick">Which platform did you complete it on? Tap to set</string>
     <string name="completed_on_title">Which platform did you complete it on?</string>
     <string name="completed_on_hint">A game can look and play very differently on each platform. Pick the one you finished it on.</string>
-    <string name="completed_on_none">Don't say</string>
+    <string name="completed_on_none">Don\'t say</string>
 </resources>
